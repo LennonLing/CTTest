@@ -8,6 +8,17 @@
 
 #import <UIKit/UIKit.h>
 
+extern const NSString * _Nullable CTAttributedStringNeedBorder;
+extern const NSString * _Nullable CTAttributedStringBorderWidth;
+extern const NSString * _Nullable CTAttributedStringBorderColor;
+extern const NSString * _Nullable CTAttributedStringBorderCornerRadius;
+
+
 @interface CTDisplayView : UIView
+
+/**
+ *  在这个特殊的定制的界面中只是添加这么一个特殊的属性，作为信息的唯一来源
+ */
+@property(nullable, nonatomic,copy)   NSAttributedString *attributedText NS_AVAILABLE_IOS(6_0);  // default is nil
 
 @end

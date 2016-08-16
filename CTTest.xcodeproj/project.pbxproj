@@ -15,6 +15,8 @@
 		29015BFA1D4F65160082F21A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 29015BF81D4F65160082F21A /* LaunchScreen.storyboard */; };
 		29015C031D4F65490082F21A /* CTDisplayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 29015C021D4F65490082F21A /* CTDisplayView.m */; };
 		29207F381D5812F100441FAF /* apple.png in Resources */ = {isa = PBXBuildFile; fileRef = 29207F371D5812F100441FAF /* apple.png */; };
+		29408F281D61AF620030D909 /* CTDisplayViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 29408F271D61AF620030D909 /* CTDisplayViewModel.m */; };
+		29408F2E1D61CDB00030D909 /* NSAttributedString+Line.m in Sources */ = {isa = PBXBuildFile; fileRef = 29408F2D1D61CDB00030D909 /* NSAttributedString+Line.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,10 @@
 		29015C011D4F65490082F21A /* CTDisplayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTDisplayView.h; sourceTree = "<group>"; };
 		29015C021D4F65490082F21A /* CTDisplayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTDisplayView.m; sourceTree = "<group>"; };
 		29207F371D5812F100441FAF /* apple.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = apple.png; sourceTree = "<group>"; };
+		29408F261D61AF620030D909 /* CTDisplayViewModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CTDisplayViewModel.h; path = ../CTDisplayViewModel.h; sourceTree = "<group>"; };
+		29408F271D61AF620030D909 /* CTDisplayViewModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CTDisplayViewModel.m; path = ../CTDisplayViewModel.m; sourceTree = "<group>"; };
+		29408F2C1D61CDB00030D909 /* NSAttributedString+Line.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSAttributedString+Line.h"; sourceTree = "<group>"; };
+		29408F2D1D61CDB00030D909 /* NSAttributedString+Line.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSAttributedString+Line.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +69,8 @@
 		29015BE91D4F65160082F21A /* CTTest */ = {
 			isa = PBXGroup;
 			children = (
+				29408F2C1D61CDB00030D909 /* NSAttributedString+Line.h */,
+				29408F2D1D61CDB00030D909 /* NSAttributedString+Line.m */,
 				29207F371D5812F100441FAF /* apple.png */,
 				29015BED1D4F65160082F21A /* AppDelegate.h */,
 				29015BEE1D4F65160082F21A /* AppDelegate.m */,
@@ -75,6 +83,8 @@
 				29015BEA1D4F65160082F21A /* Supporting Files */,
 				29015C011D4F65490082F21A /* CTDisplayView.h */,
 				29015C021D4F65490082F21A /* CTDisplayView.m */,
+				29408F261D61AF620030D909 /* CTDisplayViewModel.h */,
+				29408F271D61AF620030D909 /* CTDisplayViewModel.m */,
 			);
 			path = CTTest;
 			sourceTree = "<group>";
@@ -162,7 +172,9 @@
 				29015BF21D4F65160082F21A /* ViewController.m in Sources */,
 				29015BEF1D4F65160082F21A /* AppDelegate.m in Sources */,
 				29015C031D4F65490082F21A /* CTDisplayView.m in Sources */,
+				29408F2E1D61CDB00030D909 /* NSAttributedString+Line.m in Sources */,
 				29015BEC1D4F65160082F21A /* main.m in Sources */,
+				29408F281D61AF620030D909 /* CTDisplayViewModel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
