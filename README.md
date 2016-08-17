@@ -75,4 +75,4 @@ CoreText排版实现标签的效果，在排版过程中你可以自定义如下
 	    [self.view addSubview:displayView];
 	    
 #### Tips
-该功能的实现有针对性，如果你想在此基础上添加自己的排版方式，可以fork该工程，添加自己需求。这里主要讲述的还是CoreText排版的思想。更多内容[前往]()
+该功能的实现有针对性，如果你想在此基础上添加自己的排版方式，可以fork该工程，添加自己需求。这里主要讲述的还是CoreText排版的思想。更多内容[前往](https://chieryd.github.io/chieryd.github.io/2016/CoreText%E5%AE%9E%E7%8E%B0%E6%B7%BB%E5%8A%A0%E6%A0%87%E7%AD%BE/)
