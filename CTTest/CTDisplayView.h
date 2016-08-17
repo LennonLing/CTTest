@@ -12,6 +12,9 @@ extern const NSString * _Nullable CTAttributedStringNeedBorder;
 extern const NSString * _Nullable CTAttributedStringBorderWidth;
 extern const NSString * _Nullable CTAttributedStringBorderColor;
 extern const NSString * _Nullable CTAttributedStringBorderCornerRadius;
+extern const NSString * _Nullable CTAttributedStringBorderHorizonSpacing;
+extern const NSString * _Nullable CTAttributedStringBorderVerticalSpacing;
+
 
 
 @interface CTDisplayView : UIView

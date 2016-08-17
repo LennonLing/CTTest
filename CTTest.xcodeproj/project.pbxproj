@@ -17,6 +17,9 @@
 		29207F381D5812F100441FAF /* apple.png in Resources */ = {isa = PBXBuildFile; fileRef = 29207F371D5812F100441FAF /* apple.png */; };
 		29408F281D61AF620030D909 /* CTDisplayViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 29408F271D61AF620030D909 /* CTDisplayViewModel.m */; };
 		29408F2E1D61CDB00030D909 /* NSAttributedString+Line.m in Sources */ = {isa = PBXBuildFile; fileRef = 29408F2D1D61CDB00030D909 /* NSAttributedString+Line.m */; };
+		2978B2AB1D640DB000D1D685 /* CTFrameParserConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 2978B2AA1D640DB000D1D685 /* CTFrameParserConfig.m */; };
+		2978B2AE1D64106700D1D685 /* CTFrameParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 2978B2AD1D64106700D1D685 /* CTFrameParser.m */; };
+		2978B2B11D641B7E00D1D685 /* CTShortFrameModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2978B2B01D641B7E00D1D685 /* CTShortFrameModel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +40,12 @@
 		29408F271D61AF620030D909 /* CTDisplayViewModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CTDisplayViewModel.m; path = ../CTDisplayViewModel.m; sourceTree = "<group>"; };
 		29408F2C1D61CDB00030D909 /* NSAttributedString+Line.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSAttributedString+Line.h"; sourceTree = "<group>"; };
 		29408F2D1D61CDB00030D909 /* NSAttributedString+Line.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSAttributedString+Line.m"; sourceTree = "<group>"; };
+		2978B2A91D640DB000D1D685 /* CTFrameParserConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFrameParserConfig.h; sourceTree = "<group>"; };
+		2978B2AA1D640DB000D1D685 /* CTFrameParserConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTFrameParserConfig.m; sourceTree = "<group>"; };
+		2978B2AC1D64106700D1D685 /* CTFrameParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFrameParser.h; sourceTree = "<group>"; };
+		2978B2AD1D64106700D1D685 /* CTFrameParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTFrameParser.m; sourceTree = "<group>"; };
+		2978B2AF1D641B7E00D1D685 /* CTShortFrameModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTShortFrameModel.h; sourceTree = "<group>"; };
+		2978B2B01D641B7E00D1D685 /* CTShortFrameModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTShortFrameModel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +94,12 @@
 				29015C021D4F65490082F21A /* CTDisplayView.m */,
 				29408F261D61AF620030D909 /* CTDisplayViewModel.h */,
 				29408F271D61AF620030D909 /* CTDisplayViewModel.m */,
+				2978B2A91D640DB000D1D685 /* CTFrameParserConfig.h */,
+				2978B2AA1D640DB000D1D685 /* CTFrameParserConfig.m */,
+				2978B2AC1D64106700D1D685 /* CTFrameParser.h */,
+				2978B2AD1D64106700D1D685 /* CTFrameParser.m */,
+				2978B2AF1D641B7E00D1D685 /* CTShortFrameModel.h */,
+				2978B2B01D641B7E00D1D685 /* CTShortFrameModel.m */,
 			);
 			path = CTTest;
 			sourceTree = "<group>";
@@ -170,11 +185,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				29015BF21D4F65160082F21A /* ViewController.m in Sources */,
+				2978B2AE1D64106700D1D685 /* CTFrameParser.m in Sources */,
 				29015BEF1D4F65160082F21A /* AppDelegate.m in Sources */,
 				29015C031D4F65490082F21A /* CTDisplayView.m in Sources */,
 				29408F2E1D61CDB00030D909 /* NSAttributedString+Line.m in Sources */,
 				29015BEC1D4F65160082F21A /* main.m in Sources */,
+				2978B2AB1D640DB000D1D685 /* CTFrameParserConfig.m in Sources */,
 				29408F281D61AF620030D909 /* CTDisplayViewModel.m in Sources */,
+				2978B2B11D641B7E00D1D685 /* CTShortFrameModel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

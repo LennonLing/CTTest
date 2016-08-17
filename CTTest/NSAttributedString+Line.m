@@ -19,12 +19,12 @@
     CGFloat leading;
     // get bounds info
     CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-    return ascent + descent + 6;
+    return ascent + descent;
 }
 
 - (CGFloat)width {
     CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self);
-    return CTLineGetBoundsWithOptions(line,kCTLineBoundsExcludeTypographicLeading).size.width + 4;
+    return CTLineGetBoundsWithOptions(line,kCTLineBoundsExcludeTypographicLeading).size.width;
 }
 
 

@@ -9,6 +9,8 @@
 #import "CTDisplayViewModel.h"
 #import <CoreText/CoreText.h>
 #import "NSAttributedString+Line.h"
+#import "CTFrameParser.h"
+#import "CTShortFrameModel.h"
 
 /**
  *  单独的attributedString在当前行中的长度。
@@ -77,9 +79,7 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
 @property (nonatomic, strong) NSMutableArray *frameRefMutableArray;
 @property (nonatomic, strong, readwrite) NSArray *frameArray;
 @property (nonatomic, strong) NSMutableArray *frameMutableArray;
-@property (nonatomic, strong) NSMutableArray *tempShortAttributedStringArray;
-@property (nonatomic, strong) NSMutableArray *tempShortAttributedStringRangeArray;
-
+@property (nonatomic, strong) NSMutableArray *tempShortFrameMutableArray;
 @end
 
 @implementation CTDisplayViewModel
@@ -116,7 +116,7 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
                                               options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired
                                            usingBlock:^(NSDictionary<NSString *,id> * _Nonnull attrs, NSRange range, BOOL * _Nonnull stop) {
                                                __strong typeof(weakSelf) strongSelf = weakSelf;
-                                               if (strongSelf) [strongSelf createLineRefWithRange:range attributedInfo:attrs];
+                                               if (strongSelf) [strongSelf createLineRefWithRange:range config:[CTFrameParser configWithAttributes:attrs]];
                                            }];
 }
 
@@ -124,7 +124,7 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     [self addPieceLineRef];
 }
 
-- (void)createLineRefWithRange:(NSRange)range attributedInfo:(NSDictionary *)attrs{
+- (void)createLineRefWithRange:(NSRange)range config:(CTFrameParserConfig *)config{
     if (range.length == 0) return;
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     if ([self greatThanBoundsHeight:attributedString]) {self.yStart = CGFLOAT_MAX; return;}
@@ -133,33 +133,31 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
         case CTAttributedStringJoinDefault:
             switch ([self attributedStringLengthType:attributedString]) {
                 case CTAttributedStringLengthTypeDefault:
-                    [self.tempShortAttributedStringArray addObject:attributedString];
-                    [self.tempShortAttributedStringRangeArray addObject:[self dictionaryFromeRange:range]];
-                    [self.frameMutableArray addObject:@([self attributedStringNeedFrame:attrs])];
+                    [self addShortFrameModel:attributedString config:config range:range];
+                    [self.frameMutableArray addObject:config];
                     [self setXStart:self.xStart + attributedString.width];
                     break;
                 case CTAttributedStringLengthTypeGreatOrEqualThanLine:
-                    [self addCompletedLineRef:range attributedInfo:attrs];
+                    [self addCompletedLineRef:range config:config];
                     break;
             }
             break;
         case CTAttributedStringJoinMiddle:
             switch ([self pieceLineCompleted:attributedString]) {
                 case CTPieceLineCompletedDefault:
-                    [self.tempShortAttributedStringArray addObject:attributedString];
-                    [self.tempShortAttributedStringRangeArray addObject:[self dictionaryFromeRange:range]];
-                    [self.frameMutableArray addObject:@([self attributedStringNeedFrame:attrs])];
+                    [self addShortFrameModel:attributedString config:config range:range];
+                    [self.frameMutableArray addObject:config];
                     [self setXStart:self.xStart + attributedString.width];
                     break;
                 case CTPieceLineCompletedDone:
-                    switch ([self attributedStringNeedFrame:attrs]) {
+                    switch ([self attributedStringNeedFrame:config]) {
                         case CTAttributedStringNeedBorderDefault:
-                            [self addBreakAttributesStringWithRange:range attributedInfo:attrs];
+                            [self addBreakAttributesStringWithRange:range config:config];
                             break;
                         case CTAttributedStringNeedBorderYes:
                             [self addPieceLineRef];
                             [self setXStart:0];
-                            [self createLineRefWithRange:range attributedInfo:attrs];
+                            [self createLineRefWithRange:range config:config];
                             break;
                     }
                     break;
@@ -169,60 +167,61 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
 }
 
 #pragma mark - 整理行环境
-- (void)addCompletedLineRef:(NSRange)range attributedInfo:(NSDictionary *)attrs {
+- (void)addCompletedLineRef:(NSRange)range config:(CTFrameParserConfig *)config {
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     
     CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart, CGRectGetWidth(self.contextBounds), attributedString.height)], 2, 3));
+    CGRect tempRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart, CGRectGetWidth(self.contextBounds), attributedString.height + 2 * config.borderVerticalSpacing)], config.borderHorizonSpacing, config.borderVerticalSpacing);
+    CGPathAddRect(path, NULL, tempRect);
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
     [self.frameRefMutableArray addObject:(__bridge id _Nonnull)(frame)];
-    [self.frameMutableArray addObject:@([self attributedStringNeedFrame:attrs])];
+    [self.frameMutableArray addObject:config];
     CFRelease(frame);
     CFRelease(path);
-    self.yStart += attributedString.height;
+    self.yStart += (attributedString.height + 2 * config.borderVerticalSpacing);
 
     
     CFRange frameRange = CTFrameGetVisibleStringRange(frame);
-    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) attributedInfo:attrs];
+    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
 }
 
 - (void)addPieceLineRef {
-    if (self.tempShortAttributedStringArray.count == 0) return;
-    self.xStart = 0;
+    if (self.tempShortFrameMutableArray.count == 0) return;
+    [self setXStart:0];
     [self createShortLineFrameRef:[self maxLineHeight]];
-    self.yStart += [self maxLineHeight];
-    [self.tempShortAttributedStringArray removeAllObjects];
-    [self.tempShortAttributedStringRangeArray removeAllObjects];
+    [self setYStart:self.yStart + [self maxLineHeight]];
+    [self.tempShortFrameMutableArray removeAllObjects];
 }
 
 - (void)createShortLineFrameRef:(CGFloat)maxLineHeight {
-    for (NSInteger i = 0; i < self.tempShortAttributedStringArray.count; i++) {
-        NSAttributedString *attributedString = self.tempShortAttributedStringArray[i];
-        NSRange range = [self rangeFromDictionary:self.tempShortAttributedStringRangeArray[i]];
+    
+    for (CTShortFrameModel *model in self.tempShortFrameMutableArray) {
         CGMutablePathRef path = CGPathCreateMutable();
-        CGPathAddRect(path, NULL, CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart + maxLineHeight - attributedString.height, attributedString.width, attributedString.height)], 2, 3));
-        CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
+        CGRect tempRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart + maxLineHeight - (model.attributedString.height + 2*model.config.borderVerticalSpacing), model.attributedString.width + 2*model.config.borderHorizonSpacing, model.attributedString.height + 2 * model.config.borderVerticalSpacing)], model.config.borderHorizonSpacing, model.config.borderVerticalSpacing);
+        CGPathAddRect(path, NULL, tempRect);
+        CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(model.range.location, model.range.length), path, NULL);
         [self.frameRefMutableArray addObject:(__bridge id _Nonnull)(frame)];
         CFRelease(frame);
         CFRelease(path);
-        self.xStart += attributedString.width;
+        
+        self.xStart += (model.attributedString.width + 2*model.config.borderHorizonSpacing);
     }
 }
 
-- (void)addBreakAttributesStringWithRange:(NSRange)range attributedInfo:(NSDictionary *)attrs {
+- (void)addBreakAttributesStringWithRange:(NSRange)range config:(CTFrameParserConfig *)config {
     self.xStart = 0;
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
 
-    CGFloat maxLineHeight = [self maxLineHeight]>attributedString.height?[self maxLineHeight]:attributedString.height;
+    CGFloat maxLineHeight = [self maxLineHeight]>(attributedString.height + 2*config.borderVerticalSpacing)?[self maxLineHeight]:(attributedString.height + 2*config.borderVerticalSpacing);
     [self createShortLineFrameRef:maxLineHeight];
-    [self.tempShortAttributedStringArray removeAllObjects];
-    [self.tempShortAttributedStringRangeArray removeAllObjects];
+    [self.tempShortFrameMutableArray removeAllObjects];
     
     CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart + maxLineHeight - attributedString.height, CGRectGetWidth(self.contextBounds) - self.xStart, attributedString.height)], 2, 3));
+    CGRect tempRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart + maxLineHeight - (attributedString.height + 2*config.borderVerticalSpacing), CGRectGetWidth(self.contextBounds) - self.xStart, (attributedString.height + 2*config.borderVerticalSpacing))], config.borderHorizonSpacing, config.borderVerticalSpacing);
+    CGPathAddRect(path, NULL, tempRect);
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
     [self.frameRefMutableArray addObject:(__bridge id _Nonnull)(frame)];
-    [self.frameMutableArray addObject:@(NO)];
+    [self.frameMutableArray addObject:config];
     CFRelease(path);
     
     self.yStart += maxLineHeight;
@@ -230,27 +229,24 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     
     CFRange frameRange = CTFrameGetVisibleStringRange(frame);
     CFRelease(frame);
-    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) attributedInfo:attrs];
+    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
 
     
 }
 
-- (NSDictionary *)dictionaryFromeRange:(NSRange)range {
-    return @{
-             @"location":@(range.location),
-             @"length":@(range.length)
-             };
-}
-
-- (NSRange)rangeFromDictionary:(NSDictionary *)dict {
-    return NSMakeRange([dict[@"location"] integerValue], [dict[@"length"] integerValue]);
+- (void)addShortFrameModel:(NSAttributedString *)attributedString config:(CTFrameParserConfig *)config range:(NSRange)range {
+    CTShortFrameModel *model = [CTShortFrameModel new];
+    model.attributedString = attributedString;
+    model.config = config;
+    model.range = range;
+    [self.tempShortFrameMutableArray addObject:model];
 }
 
 - (CGFloat)maxLineHeight {
     CGFloat maxHeight = 0;
-    for (NSAttributedString *attributedString in self.tempShortAttributedStringArray) {
-        if (attributedString.height > maxHeight)
-            maxHeight = attributedString.height;
+    for (CTShortFrameModel *model in self.tempShortFrameMutableArray) {
+        if ((model.attributedString.height + 2*model.config.borderVerticalSpacing) > maxHeight)
+            maxHeight = (model.attributedString.height + 2*model.config.borderVerticalSpacing);
     }
     return maxHeight;
 }
@@ -267,23 +263,14 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     return NO;
 }
 
-- (BOOL)end:(NSAttributedString *)attributedString {
-    NSRange range = [@"高。" rangeOfString:self.attributedString.string];
-    if (range.length + range.location == self.attributedString.length) {
-        return YES;
-    }
-    return NO;
-}
-
 - (CTAttributedStringLengthType)attributedStringLengthType:(NSAttributedString *)attibutedString {
     if (attibutedString.width > CGRectGetWidth(self.contextBounds))
         return CTAttributedStringLengthTypeGreatOrEqualThanLine;
     return CTAttributedStringLengthTypeDefault;
 }
 
-- (CTAttributedStringNeedBorder)attributedStringNeedFrame:(NSDictionary *)attris {
-    if ([[attris valueForKey:@"CTAttributedStringNeedBorder"] boolValue])
-        return CTAttributedStringNeedBorderYes;
+- (CTAttributedStringNeedBorder)attributedStringNeedFrame:(CTFrameParserConfig *)config {
+    if (config.needBorder) return CTAttributedStringNeedBorderYes;
     return CTAttributedStringNeedBorderDefault;
 }
 
@@ -314,13 +301,6 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     return _frameRefArray;
 }
 
-- (NSMutableArray *)tempShortAttributedStringArray {
-    if (!_tempShortAttributedStringArray) {
-        _tempShortAttributedStringArray = [NSMutableArray new];
-    }
-    return _tempShortAttributedStringArray;
-}
-
 - (NSArray *)frameArray {
     if (!_frameArray) {
         _frameArray = [self.frameMutableArray copy];
@@ -335,11 +315,11 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     return _frameMutableArray;
 }
 
-- (NSMutableArray *)tempShortAttributedStringRangeArray {
-    if (!_tempShortAttributedStringRangeArray) {
-        _tempShortAttributedStringRangeArray = [NSMutableArray new];
+- (NSMutableArray *)tempShortFrameMutableArray {
+    if (!_tempShortFrameMutableArray) {
+        _tempShortFrameMutableArray = [NSMutableArray new];
     }
-    return _tempShortAttributedStringRangeArray;
+    return _tempShortFrameMutableArray;
 }
 
 @end

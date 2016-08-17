@@ -9,11 +9,15 @@
 #import "CTDisplayView.h"
 #import <CoreText/CoreText.h>
 #import "CTDisplayViewModel.h"
+#import "CTFrameParserConfig.h"
 
 const NSString * CTAttributedStringNeedBorder = @"CTAttributedStringNeedBorder";
 const NSString * CTAttributedStringBorderWidth = @"CTAttributedStringBorderWidth";
 const NSString * CTAttributedStringBorderColor = @"CTAttributedStringBorderColor";
 const NSString * CTAttributedStringBorderCornerRadius = @"CTAttributedStringBorderCornerRadius";
+const NSString * CTAttributedStringBorderHorizonSpacing = @"CTAttributedStringBorderHorizonSpacing";
+const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringBorderVerticalSpacing";
+
 
 @interface CTDisplayView ()
 @property (nonatomic, strong) CTDisplayViewModel *model;
@@ -48,13 +52,17 @@ const NSString * CTAttributedStringBorderCornerRadius = @"CTAttributedStringBord
     
     for (NSInteger i = 0; i < self.model.frameRefArray.count; i++) {
         CTFrameRef frame = (__bridge CTFrameRef)(self.model.frameRefArray[i]);
+        CTFrameParserConfig *config = self.model.frameArray[i];
         
-        CGPathRef path = (CGPathRef)CTFrameGetPath(frame);
-        CGRect pathRect = CGPathGetPathBoundingBox(path);
-        UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(pathRect, -2, -3) cornerRadius:2];
-        [[UIColor greenColor] set];
-        bezierPath.lineWidth = 0.5f;
-        [bezierPath stroke];
+        // 需要边框的才会绘制边框
+        if (config.needBorder) {
+            CGPathRef path = (CGPathRef)CTFrameGetPath(frame);
+            CGRect pathRect = CGPathGetPathBoundingBox(path);
+            UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(pathRect, -config.borderHorizonSpacing, -config.borderVerticalSpacing) cornerRadius:config.borderCornerRadius];
+            [config.borderColor set];
+            bezierPath.lineWidth = config.borderWidth;
+            [bezierPath stroke];
+        }
         
         CTFrameDraw(frame, context);
     }
