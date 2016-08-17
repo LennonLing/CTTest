@@ -6,9 +6,9 @@
 //  Copyright © 2016年 My-Zone. All rights reserved.
 //
 
-#import "CTDisplayView.h"
+#import "CTTagView.h"
 #import <CoreText/CoreText.h>
-#import "CTDisplayViewModel.h"
+#import "CTTagViewModel.h"
 #import "CTFrameParserConfig.h"
 
 const NSString * CTAttributedStringNeedBorder = @"CTAttributedStringNeedBorder";
@@ -19,17 +19,18 @@ const NSString * CTAttributedStringBorderHorizonSpacing = @"CTAttributedStringBo
 const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringBorderVerticalSpacing";
 
 
-@interface CTDisplayView ()
-@property (nonatomic, strong) CTDisplayViewModel *model;
+@interface CTTagView ()
+@property (nonatomic, strong) CTTagViewModel *model;
 @end
 
 
-@implementation CTDisplayView
+@implementation CTTagView
 
 - (void)willMoveToSuperview:(UIView *)newSuperview {
     [super willMoveToSuperview:newSuperview];
     
-    self.model = [[CTDisplayViewModel alloc] initWithAttributedString:self.attributedText andBounds:self.bounds];
+    // load model
+    self.model = [[CTTagViewModel alloc] initWithAttributedString:self.attributedText andBounds:self.bounds];
     
     // 从这里获取当前View的size 组装对应的model
     [self setNeedsDisplay];

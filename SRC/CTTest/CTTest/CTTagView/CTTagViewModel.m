@@ -6,7 +6,7 @@
 //  Copyright © 2016年 My-Zone. All rights reserved.
 //
 
-#import "CTDisplayViewModel.h"
+#import "CTTagViewModel.h"
 #import <CoreText/CoreText.h>
 #import "NSAttributedString+Line.h"
 #import "CTFrameParser.h"
@@ -68,7 +68,7 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     CTPieceLineCompletedDone
 };
 
-@interface CTDisplayViewModel ()
+@interface CTTagViewModel ()
 @property (nonatomic) CGRect contextBounds;
 @property (nonatomic) CGFloat xStart;
 @property (nonatomic) CGFloat yStart;
@@ -82,7 +82,7 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
 @property (nonatomic, strong) NSMutableArray *tempShortFrameMutableArray;
 @end
 
-@implementation CTDisplayViewModel
+@implementation CTTagViewModel
 
 - (void)dealloc {
     CFRelease(_framesetter);
@@ -125,35 +125,50 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
 }
 
 - (void)createLineRefWithRange:(NSRange)range config:(CTFrameParserConfig *)config{
+    // 如果range.length == 0说明该段属性下的文字已经绘制完全了递归的时候使用
     if (range.length == 0) return;
+    // 根据range那个attributedString
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
-    if ([self greatThanBoundsHeight:attributedString]) {self.yStart = CGFLOAT_MAX; return;}
+    // 计算绘制的高度是否超出给定的高度
+    if ([self greatThanBoundsHeight:attributedString config:config]) {self.yStart = CGFLOAT_MAX; return;}
     
+    // 计算当前文字的拼接节点是在行开始还是在行中间
     switch ([self attributedStringJoin]) {
+        // 行开始的处理
         case CTAttributedStringJoinDefault:
-            switch ([self attributedStringLengthType:attributedString]) {
+            // 当前需要绘制的文字的长度类型
+            switch ([self attributedStringLengthType:attributedString config:config]) {
+                // 长度小于当前行的情况，将当前信息收集起来，x游标向后移动
                 case CTAttributedStringLengthTypeDefault:
                     [self addShortFrameModel:attributedString config:config range:range];
                     [self.frameMutableArray addObject:config];
-                    [self setXStart:self.xStart + attributedString.width];
+                    [self setXStart:self.xStart + attributedString.width + 2*config.borderHorizonSpacing];
                     break;
+                // 长度大于当前行的情况，绘制此文字
                 case CTAttributedStringLengthTypeGreatOrEqualThanLine:
                     [self addCompletedLineRef:range config:config];
                     break;
             }
             break;
+        // 行中间的处理
         case CTAttributedStringJoinMiddle:
-            switch ([self pieceLineCompleted:attributedString]) {
+            //
+            switch ([self pieceLineCompleted:attributedString config:config]) {
+                // 没有被充满,将当前信息收集起来，x游标向后移动
                 case CTPieceLineCompletedDefault:
                     [self addShortFrameModel:attributedString config:config range:range];
                     [self.frameMutableArray addObject:config];
-                    [self setXStart:self.xStart + attributedString.width];
+                    [self setXStart:self.xStart + attributedString.width + 2*config.borderHorizonSpacing];
                     break;
+                // 已经被充满
                 case CTPieceLineCompletedDone:
+                    // 计算当前绘制的文字是否需要加边框
                     switch ([self attributedStringNeedFrame:config]) {
+                        // 不需要加上边框
                         case CTAttributedStringNeedBorderDefault:
                             [self addBreakAttributesStringWithRange:range config:config];
                             break;
+                        // 需要加边框，将之前行文字数组中的文字绘制，x游标指向0，本次文字做递归处理
                         case CTAttributedStringNeedBorderYes:
                             [self addPieceLineRef];
                             [self setXStart:0];
@@ -257,14 +272,14 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
 
 #pragma mark - 检测当拼接的状态
 
-- (BOOL)greatThanBoundsHeight:(NSAttributedString *)attributedString {
-    if (self.yStart + attributedString.height > CGRectGetHeight(self.contextBounds))
+- (BOOL)greatThanBoundsHeight:(NSAttributedString *)attributedString config:(CTFrameParserConfig *)config{
+    if ((self.yStart + attributedString.height + 2*config.borderVerticalSpacing) > CGRectGetHeight(self.contextBounds))
         return YES;
     return NO;
 }
 
-- (CTAttributedStringLengthType)attributedStringLengthType:(NSAttributedString *)attibutedString {
-    if (attibutedString.width > CGRectGetWidth(self.contextBounds))
+- (CTAttributedStringLengthType)attributedStringLengthType:(NSAttributedString *)attibutedString config:(CTFrameParserConfig *)config {
+    if ((attibutedString.width + 2*config.borderHorizonSpacing) > CGRectGetWidth(self.contextBounds))
         return CTAttributedStringLengthTypeGreatOrEqualThanLine;
     return CTAttributedStringLengthTypeDefault;
 }
@@ -274,8 +289,8 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     return CTAttributedStringNeedBorderDefault;
 }
 
-- (CTPieceLineCompleted)pieceLineCompleted:(NSAttributedString *)attributedString {
-    if (self.xStart + attributedString.width > CGRectGetWidth(self.contextBounds))
+- (CTPieceLineCompleted)pieceLineCompleted:(NSAttributedString *)attributedString config:(CTFrameParserConfig *)config {
+    if ((self.xStart + attributedString.width + 2*config.borderHorizonSpacing) > CGRectGetWidth(self.contextBounds))
         return CTPieceLineCompletedDone;
     return CTPieceLineCompletedDefault;
 }

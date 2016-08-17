@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@interface CTDisplayViewModel : NSObject
+@interface CTTagViewModel : NSObject
 
 /**
  *  组装成可供绘制的数组，供drawRect使用

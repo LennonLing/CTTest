@@ -17,7 +17,7 @@ extern const NSString * _Nullable CTAttributedStringBorderVerticalSpacing;
 
 
 
-@interface CTDisplayView : UIView
+@interface CTTagView : UIView
 
 /**
  *  在这个特殊的定制的界面中只是添加这么一个特殊的属性，作为信息的唯一来源
