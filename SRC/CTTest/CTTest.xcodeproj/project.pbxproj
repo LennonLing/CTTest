@@ -13,13 +13,12 @@
 		29015BF51D4F65160082F21A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 29015BF31D4F65160082F21A /* Main.storyboard */; };
 		29015BF71D4F65160082F21A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 29015BF61D4F65160082F21A /* Assets.xcassets */; };
 		29015BFA1D4F65160082F21A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 29015BF81D4F65160082F21A /* LaunchScreen.storyboard */; };
-		29015C031D4F65490082F21A /* CTTagView.m in Sources */ = {isa = PBXBuildFile; fileRef = 29015C021D4F65490082F21A /* CTTagView.m */; };
-		29207F381D5812F100441FAF /* apple.png in Resources */ = {isa = PBXBuildFile; fileRef = 29207F371D5812F100441FAF /* apple.png */; };
 		2978B2BD1D64446200D1D685 /* CTFrameParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 2978B2B41D64446200D1D685 /* CTFrameParser.m */; };
 		2978B2BE1D64446200D1D685 /* CTFrameParserConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 2978B2B61D64446200D1D685 /* CTFrameParserConfig.m */; };
 		2978B2BF1D64446200D1D685 /* CTShortFrameModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2978B2B81D64446200D1D685 /* CTShortFrameModel.m */; };
 		2978B2C01D64446200D1D685 /* CTTagViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2978B2BA1D64446200D1D685 /* CTTagViewModel.m */; };
 		2978B2C11D64446200D1D685 /* NSAttributedString+Line.m in Sources */ = {isa = PBXBuildFile; fileRef = 2978B2BC1D64446200D1D685 /* NSAttributedString+Line.m */; };
+		2990E2911D73E84100FEF06A /* CTTagView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2990E2901D73E84100FEF06A /* CTTagView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,9 +32,6 @@
 		29015BF61D4F65160082F21A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		29015BF91D4F65160082F21A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		29015BFB1D4F65160082F21A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		29015C011D4F65490082F21A /* CTTagView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTTagView.h; sourceTree = "<group>"; };
-		29015C021D4F65490082F21A /* CTTagView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTTagView.m; sourceTree = "<group>"; };
-		29207F371D5812F100441FAF /* apple.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = apple.png; sourceTree = "<group>"; };
 		2978B2B31D64446200D1D685 /* CTFrameParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFrameParser.h; sourceTree = "<group>"; };
 		2978B2B41D64446200D1D685 /* CTFrameParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTFrameParser.m; sourceTree = "<group>"; };
 		2978B2B51D64446200D1D685 /* CTFrameParserConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFrameParserConfig.h; sourceTree = "<group>"; };
@@ -46,6 +42,8 @@
 		2978B2BA1D64446200D1D685 /* CTTagViewModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTTagViewModel.m; sourceTree = "<group>"; };
 		2978B2BB1D64446200D1D685 /* NSAttributedString+Line.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSAttributedString+Line.h"; sourceTree = "<group>"; };
 		2978B2BC1D64446200D1D685 /* NSAttributedString+Line.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSAttributedString+Line.m"; sourceTree = "<group>"; };
+		2990E28F1D73E84100FEF06A /* CTTagView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTTagView.h; sourceTree = "<group>"; };
+		2990E2901D73E84100FEF06A /* CTTagView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTTagView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,7 +77,6 @@
 			isa = PBXGroup;
 			children = (
 				2978B2B21D64446200D1D685 /* CTTagView */,
-				29207F371D5812F100441FAF /* apple.png */,
 				29015BED1D4F65160082F21A /* AppDelegate.h */,
 				29015BEE1D4F65160082F21A /* AppDelegate.m */,
 				29015BF01D4F65160082F21A /* ViewController.h */,
@@ -89,8 +86,6 @@
 				29015BF81D4F65160082F21A /* LaunchScreen.storyboard */,
 				29015BFB1D4F65160082F21A /* Info.plist */,
 				29015BEA1D4F65160082F21A /* Supporting Files */,
-				29015C011D4F65490082F21A /* CTTagView.h */,
-				29015C021D4F65490082F21A /* CTTagView.m */,
 			);
 			path = CTTest;
 			sourceTree = "<group>";
@@ -106,6 +101,8 @@
 		2978B2B21D64446200D1D685 /* CTTagView */ = {
 			isa = PBXGroup;
 			children = (
+				2990E28F1D73E84100FEF06A /* CTTagView.h */,
+				2990E2901D73E84100FEF06A /* CTTagView.m */,
 				2978B2B31D64446200D1D685 /* CTFrameParser.h */,
 				2978B2B41D64446200D1D685 /* CTFrameParser.m */,
 				2978B2B51D64446200D1D685 /* CTFrameParserConfig.h */,
@@ -180,7 +177,6 @@
 			files = (
 				29015BFA1D4F65160082F21A /* LaunchScreen.storyboard in Resources */,
 				29015BF71D4F65160082F21A /* Assets.xcassets in Resources */,
-				29207F381D5812F100441FAF /* apple.png in Resources */,
 				29015BF51D4F65160082F21A /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -196,9 +192,9 @@
 				29015BF21D4F65160082F21A /* ViewController.m in Sources */,
 				2978B2C01D64446200D1D685 /* CTTagViewModel.m in Sources */,
 				29015BEF1D4F65160082F21A /* AppDelegate.m in Sources */,
-				29015C031D4F65490082F21A /* CTTagView.m in Sources */,
 				29015BEC1D4F65160082F21A /* main.m in Sources */,
 				2978B2C11D64446200D1D685 /* NSAttributedString+Line.m in Sources */,
+				2990E2911D73E84100FEF06A /* CTTagView.m in Sources */,
 				2978B2BE1D64446200D1D685 /* CTFrameParserConfig.m in Sources */,
 				2978B2BF1D64446200D1D685 /* CTShortFrameModel.m in Sources */,
 			);
