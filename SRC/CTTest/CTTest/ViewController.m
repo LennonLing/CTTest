@@ -54,7 +54,7 @@
                                       CTAttributedStringBorderColor:[UIColor greenColor],
                                       CTAttributedStringBorderCornerRadius:@(5),
                                       CTAttributedStringBorderHorizonSpacing:@(4),
-                                      CTAttributedStringBorderVerticalSpacing:@(6),
+                                      CTAttributedStringBorderVerticalSpacing:@(5),
                                       } range:NSMakeRange(70, 12)];
     
     [attributedString addAttributes:@{
