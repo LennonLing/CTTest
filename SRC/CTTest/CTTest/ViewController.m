@@ -43,19 +43,19 @@
     
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
-                                      NSFontAttributeName:[UIFont systemFontOfSize:30],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:12],
                                       CTAttributedStringNeedBorder:@(YES)
                                       } range:NSMakeRange(50, 12)];
     
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
-                                      NSFontAttributeName:[UIFont systemFontOfSize:30],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:12],
                                       CTAttributedStringNeedBorder:@(YES),
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor greenColor],
-                                      CTAttributedStringBorderCornerRadius:@(5),
-                                      CTAttributedStringBorderHorizonSpacing:@(4),
-                                      CTAttributedStringBorderVerticalSpacing:@(5),
+                                      CTAttributedStringBorderCornerRadius:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(0),
+                                      CTAttributedStringBorderVerticalSpacing:@(0),
                                       } range:NSMakeRange(70, 12)];
     
     [attributedString addAttributes:@{
@@ -70,7 +70,7 @@
                                       } range:NSMakeRange(90, 12)];
     displayView.attributedText = attributedString;
     displayView.center = self.view.center;
-    displayView.backgroundColor = [UIColor whiteColor];
+    displayView.backgroundColor = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.0];
     [self.view addSubview:displayView];
 }
 

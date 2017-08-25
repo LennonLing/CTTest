@@ -250,7 +250,7 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
     CFRange frameRange = CTFrameGetVisibleStringRange(frame);
 
-    // 将能绘制的丢到shortFrame中去
+    // 将能绘制的先绘制出来
     NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
     NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
     CGRect canDrawRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart + maxLineHeight - (attributedString.height + 2*config.borderVerticalSpacing), CGRectGetWidth(self.contextBounds) - self.xStart, canDrawAttributedString.height + 2 * config.borderVerticalSpacing)], config.borderHorizonSpacing, config.borderVerticalSpacing);

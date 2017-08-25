@@ -11,6 +11,7 @@
 
 @interface NSAttributedString (Line)
 
+- (CGFloat)lineHeight;
 - (CGFloat)height;
 - (CGFloat)width;
 

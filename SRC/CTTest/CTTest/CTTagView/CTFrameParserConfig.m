@@ -20,8 +20,8 @@
         _borderWidth = 1/[[UIScreen mainScreen] scale];
         _borderColor = [UIColor redColor];
         _borderCornerRadius = 3;
-        _borderHorizonSpacing = 2;
-        _borderVerticalSpacing = 2;
+        _borderHorizonSpacing = 0;
+        _borderVerticalSpacing = 0;
     }
     return self;
 }
