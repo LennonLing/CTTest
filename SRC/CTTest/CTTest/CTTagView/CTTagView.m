@@ -26,14 +26,16 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
 
 @implementation CTTagView
 
-- (void)willMoveToSuperview:(UIView *)newSuperview {
-    [super willMoveToSuperview:newSuperview];
-    
+- (void)layoutSubviews {
+    // 从这里开始布局 来支持autoLayout
     // load model
     self.model = [[CTTagViewModel alloc] initWithAttributedString:self.attributedText andBounds:self.bounds];
     
     // 从这里获取当前View的size 组装对应的model
     [self setNeedsDisplay];
+    
+    // 取出最后一个rect来设置约束高度
+    
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -71,6 +73,10 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
         
         CTFrameDraw(frame, context);
     }
+}
+
+- (CGSize)intrinsicContentSize {
+    return CGSizeMake(100, 100);
 }
 
 
