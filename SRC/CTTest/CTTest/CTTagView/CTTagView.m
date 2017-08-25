@@ -50,6 +50,7 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
     // 步骤 3  生成绘制文字的path
     CGMutablePathRef path = CGPathCreateMutable();
     CGPathAddRect(path, NULL, self.bounds);
+    CGPathRelease(path);
     
     for (NSInteger i = 0; i < self.model.frameRefArray.count; i++) {
         CTFrameRef frame = (__bridge CTFrameRef)(self.model.frameRefArray[i]);
@@ -59,7 +60,10 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
         if (config.needBorder) {
             CGPathRef path = (CGPathRef)CTFrameGetPath(frame);
             CGRect pathRect = CGPathGetPathBoundingBox(path);
-            UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(pathRect, -config.borderHorizonSpacing, -config.borderVerticalSpacing) cornerRadius:config.borderCornerRadius];
+            
+            // 在ios8之后的版本中行高提高了，这里需要增加额外的计算
+            CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height * 0.3), pathRect.size.width, pathRect.size.height / 1.3);
+            UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(tempPathRect, -config.borderHorizonSpacing, -config.borderVerticalSpacing) cornerRadius:config.borderCornerRadius];
             [config.borderColor set];
             bezierPath.lineWidth = config.borderWidth;
             [bezierPath stroke];

@@ -181,6 +181,16 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     }
 }
 
+#pragma mark - 辅助函数
+- (void)collectFrameAndModelWithAttibutedString:(NSAttributedString *)attributedString rectInset:(CGRect)rectInset range:(NSRange)range {
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, rectInset);
+    CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
+    [self.frameRefMutableArray addObject:(__bridge id _Nonnull)(frame)];
+    CFRelease(frame);
+    CFRelease(path);
+}
+
 #pragma mark - 整理行环境
 - (void)addCompletedLineRef:(NSRange)range config:(CTFrameParserConfig *)config {
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
@@ -189,15 +199,24 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     CGRect tempRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart, CGRectGetWidth(self.contextBounds), attributedString.height + 2 * config.borderVerticalSpacing)], config.borderHorizonSpacing, config.borderVerticalSpacing);
     CGPathAddRect(path, NULL, tempRect);
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
-    [self.frameRefMutableArray addObject:(__bridge id _Nonnull)(frame)];
+    
+    // 从这里开始将之前的文本截断，绘制可以绘制的range
+    CFRange frameRange = CTFrameGetVisibleStringRange(frame);
+    
+    // 将能绘制的丢到shortFrame中去
+    NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
+    NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
+    CGRect canDrawRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart, CGRectGetWidth(self.contextBounds), canDrawAttributedString.height + 2 * config.borderVerticalSpacing)], config.borderHorizonSpacing, config.borderVerticalSpacing);
+    [self collectFrameAndModelWithAttibutedString:canDrawAttributedString rectInset:canDrawRect range:canDrawRange];
     [self.frameMutableArray addObject:config];
+    
+    // 多余的丢到下一行去绘制
+    self.xStart = 0;
+    self.yStart += (canDrawAttributedString.height + 2 * config.borderVerticalSpacing);
+    
+    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
     CFRelease(frame);
     CFRelease(path);
-    self.yStart += (attributedString.height + 2 * config.borderVerticalSpacing);
-
-    
-    CFRange frameRange = CTFrameGetVisibleStringRange(frame);
-    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
 }
 
 - (void)addPieceLineRef {
@@ -211,14 +230,8 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
 - (void)createShortLineFrameRef:(CGFloat)maxLineHeight {
     
     for (CTShortFrameModel *model in self.tempShortFrameMutableArray) {
-        CGMutablePathRef path = CGPathCreateMutable();
         CGRect tempRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart + maxLineHeight - (model.attributedString.height + 2*model.config.borderVerticalSpacing), model.attributedString.width + 2*model.config.borderHorizonSpacing, model.attributedString.height + 2 * model.config.borderVerticalSpacing)], model.config.borderHorizonSpacing, model.config.borderVerticalSpacing);
-        CGPathAddRect(path, NULL, tempRect);
-        CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(model.range.location, model.range.length), path, NULL);
-        [self.frameRefMutableArray addObject:(__bridge id _Nonnull)(frame)];
-        CFRelease(frame);
-        CFRelease(path);
-        
+        [self collectFrameAndModelWithAttibutedString:model.attributedString rectInset:tempRect range:model.range];
         self.xStart += (model.attributedString.width + 2*model.config.borderHorizonSpacing);
     }
 }
@@ -235,18 +248,22 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     CGRect tempRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart + maxLineHeight - (attributedString.height + 2*config.borderVerticalSpacing), CGRectGetWidth(self.contextBounds) - self.xStart, (attributedString.height + 2*config.borderVerticalSpacing))], config.borderHorizonSpacing, config.borderVerticalSpacing);
     CGPathAddRect(path, NULL, tempRect);
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
-    [self.frameRefMutableArray addObject:(__bridge id _Nonnull)(frame)];
-    [self.frameMutableArray addObject:config];
-    CFRelease(path);
-    
-    self.yStart += maxLineHeight;
-    self.xStart = 0;
-    
     CFRange frameRange = CTFrameGetVisibleStringRange(frame);
-    CFRelease(frame);
-    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
 
+    // 将能绘制的丢到shortFrame中去
+    NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
+    NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
+    CGRect canDrawRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart + maxLineHeight - (attributedString.height + 2*config.borderVerticalSpacing), CGRectGetWidth(self.contextBounds) - self.xStart, canDrawAttributedString.height + 2 * config.borderVerticalSpacing)], config.borderHorizonSpacing, config.borderVerticalSpacing);
+    [self collectFrameAndModelWithAttibutedString:canDrawAttributedString rectInset:canDrawRect range:canDrawRange];
+    [self.frameMutableArray addObject:config];
     
+    // 多余的丢到下一行去绘制
+    self.xStart = 0;
+    self.yStart += maxLineHeight;
+    
+    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
+    CFRelease(frame);
+    CFRelease(path);
 }
 
 - (void)addShortFrameModel:(NSAttributedString *)attributedString config:(CTFrameParserConfig *)config range:(NSRange)range {

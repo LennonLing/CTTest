@@ -12,14 +12,17 @@
 @implementation NSAttributedString (Line)
 
 - (CGFloat)height {
-    CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self);
+//    CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self);
+//    
+//    CGFloat ascent;
+//    CGFloat descent;
+//    CGFloat leading;
+//    // get bounds info
+//    CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+//    return ceil(ascent + descent + leading);
     
-    CGFloat ascent;
-    CGFloat descent;
-    CGFloat leading;
-    // get bounds info
-    CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-    return ascent + descent;
+    CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self);
+    return CTLineGetBoundsWithOptions(line,kCTLineBoundsIncludeLanguageExtents).size.height;
 }
 
 - (CGFloat)width {
