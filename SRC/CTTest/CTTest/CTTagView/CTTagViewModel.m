@@ -132,6 +132,10 @@ static CGFloat CTTageViewYStart = 3;
     if (range.length == 0) return;
     // 根据range那个attributedString
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
+    
+    // 这里添加config高度
+    config.borderHeight = attributedString.lineHeight;
+    
     // 计算绘制的高度是否超出给定的高度
     if ([self greatThanBoundsHeight:attributedString config:config]) {self.yStart = CGFLOAT_MAX; return;}
     

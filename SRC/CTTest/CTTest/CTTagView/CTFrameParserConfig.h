@@ -19,5 +19,6 @@
 @property (nonatomic, assign) CGFloat borderCornerRadius;
 @property (nonatomic, assign) CGFloat borderHorizonSpacing;
 @property (nonatomic, assign) CGFloat borderVerticalSpacing;
+@property (nonatomic, assign) CGFloat borderHeight;
 
 @end

@@ -27,15 +27,14 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
 @implementation CTTagView
 
 - (void)layoutSubviews {
+    
+    [super layoutSubviews];
     // 从这里开始布局 来支持autoLayout
     // load model
     self.model = [[CTTagViewModel alloc] initWithAttributedString:self.attributedText andBounds:self.bounds];
     
     // 从这里获取当前View的size 组装对应的model
     [self setNeedsDisplay];
-    
-    // 取出最后一个rect来设置约束高度
-    
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -64,7 +63,7 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
             CGRect pathRect = CGPathGetPathBoundingBox(borderPath);
             
             // 在ios8之后的版本中行高提高了，这里需要增加额外的计算
-            CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height * 0.3), pathRect.size.width, pathRect.size.height / 1.3);
+            CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height - config.borderHeight), pathRect.size.width, config.borderHeight);
             UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(tempPathRect, -config.borderHorizonSpacing, -config.borderVerticalSpacing) cornerRadius:config.borderCornerRadius];
             [config.borderColor set];
             bezierPath.lineWidth = config.borderWidth;
