@@ -60,8 +60,8 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
         
         // 需要边框的才会绘制边框
         if (config.needBorder) {
-            CGPathRef path = (CGPathRef)CTFrameGetPath(frame);
-            CGRect pathRect = CGPathGetPathBoundingBox(path);
+            CGPathRef borderPath = (CGPathRef)CTFrameGetPath(frame);
+            CGRect pathRect = CGPathGetPathBoundingBox(borderPath);
             
             // 在ios8之后的版本中行高提高了，这里需要增加额外的计算
             CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height * 0.3), pathRect.size.width, pathRect.size.height / 1.3);

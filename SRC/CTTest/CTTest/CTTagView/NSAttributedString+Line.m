@@ -19,7 +19,7 @@
     // get bounds info
     CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
     CFRelease(line);
-    return ceil(ascent + descent + leading);
+    return ceil(ascent + descent);
 }
 
 - (CGFloat)height {

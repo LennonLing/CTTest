@@ -39,35 +39,68 @@
                                       NSForegroundColorAttributeName:[UIColor redColor],
                                       NSFontAttributeName:[UIFont systemFontOfSize:12],
                                       CTAttributedStringNeedBorder:@(YES)
-                                      } range:NSMakeRange(20, 12)];
+                                      } range:NSMakeRange(20, 4)];
     
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
                                       NSFontAttributeName:[UIFont systemFontOfSize:12],
                                       CTAttributedStringNeedBorder:@(YES)
-                                      } range:NSMakeRange(50, 12)];
+                                      } range:NSMakeRange(50, 6)];
     
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
-                                      NSFontAttributeName:[UIFont systemFontOfSize:12],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:20],
                                       CTAttributedStringNeedBorder:@(YES),
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor greenColor],
                                       CTAttributedStringBorderCornerRadius:@(0),
                                       CTAttributedStringBorderHorizonSpacing:@(0),
                                       CTAttributedStringBorderVerticalSpacing:@(0),
-                                      } range:NSMakeRange(70, 12)];
+                                      } range:NSMakeRange(70, 4)];
     
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
-                                      NSFontAttributeName:[UIFont systemFontOfSize:12],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:28],
+                                      CTAttributedStringNeedBorder:@(YES),
+                                      CTAttributedStringBorderWidth:@(1),
+                                      CTAttributedStringBorderColor:[UIColor greenColor],
+                                      CTAttributedStringBorderCornerRadius:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(0),
+                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      } range:NSMakeRange(75, 2)];
+    
+    [attributedString addAttributes:@{
+                                      NSForegroundColorAttributeName:[UIColor redColor],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:10],
                                       CTAttributedStringNeedBorder:@(YES),
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor yellowColor],
-                                      CTAttributedStringBorderCornerRadius:@(2),
-                                      CTAttributedStringBorderHorizonSpacing:@(1),
-                                      CTAttributedStringBorderVerticalSpacing:@(1),
-                                      } range:NSMakeRange(90, 12)];
+                                      CTAttributedStringBorderCornerRadius:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(0),
+                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      } range:NSMakeRange(90, 5)];
+    
+    [attributedString addAttributes:@{
+                                      NSForegroundColorAttributeName:[UIColor redColor],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:8],
+                                      CTAttributedStringNeedBorder:@(YES),
+                                      CTAttributedStringBorderWidth:@(1),
+                                      CTAttributedStringBorderColor:[UIColor yellowColor],
+                                      CTAttributedStringBorderCornerRadius:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(0),
+                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      } range:NSMakeRange(98, 5)];
+    
+    [attributedString addAttributes:@{
+                                      NSForegroundColorAttributeName:[UIColor redColor],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:3],
+                                      CTAttributedStringNeedBorder:@(YES),
+                                      CTAttributedStringBorderWidth:@(1),
+                                      CTAttributedStringBorderColor:[UIColor yellowColor],
+                                      CTAttributedStringBorderCornerRadius:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(0),
+                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      } range:NSMakeRange(104, 3)];
     displayView.attributedText = attributedString;
     displayView.center = self.view.center;
     displayView.backgroundColor = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.0];
