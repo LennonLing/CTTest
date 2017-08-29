@@ -28,14 +28,19 @@
     NSString *content = @"阅读分为四个阶段：基础阅读，检视阅读，分析阅读，主题阅读，经典的图书有经典的理由，《如何阅读一本书》的阅读分类方法第一次让我看到自己停留在什么阅读层次，该如何提高。这本书详细给出了每种阅读方法的进行步骤，以及不同种类的书籍要如何阅读，可以说是研究阅读方法的基础教材。看了这本书之后再看其他《越读者》、《王者速读法》等图书强化速读、主题阅读等，阅读方法有了显著的提高。";
     CTFrameParserConfig *config = [CTFrameParserConfig new];
     
+    // 这里设置当前文字中最大的宽度和高度的间隔，避免文字压线
+    config.borderHorizonSpacing = 1;
+    config.borderVerticalSpacing = 1;
+    
+
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:content attributes:[CTFrameParser attributesWithConfig:config]];
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor blackColor],
-                                      NSFontAttributeName:[UIFont systemFontOfSize:12]
+                                      NSFontAttributeName:[UIFont systemFontOfSize:10]
                                       } range:NSMakeRange(0, attributedString.length)];
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
-                                      NSFontAttributeName:[UIFont systemFontOfSize:12],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:10],
                                       CTAttributedStringNeedBorder:@(YES)
                                       } range:NSMakeRange(20, 4)];
     
@@ -69,13 +74,13 @@
     
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
-                                      NSFontAttributeName:[UIFont systemFontOfSize:10],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:8],
                                       CTAttributedStringNeedBorder:@(YES),
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor yellowColor],
                                       CTAttributedStringBorderCornerRadius:@(0),
-                                      CTAttributedStringBorderHorizonSpacing:@(0),
-                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(1),
+                                      CTAttributedStringBorderVerticalSpacing:@(1),
                                       } range:NSMakeRange(90, 5)];
     
     [attributedString addAttributes:@{
@@ -91,13 +96,13 @@
     
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
-                                      NSFontAttributeName:[UIFont systemFontOfSize:3],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:6],
                                       CTAttributedStringNeedBorder:@(YES),
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor yellowColor],
                                       CTAttributedStringBorderCornerRadius:@(0),
-                                      CTAttributedStringBorderHorizonSpacing:@(0),
-                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(1),
+                                      CTAttributedStringBorderVerticalSpacing:@(1),
                                       } range:NSMakeRange(104, 3)];
     self.tagView.attributedText = attributedString;
     self.tagView.center = self.view.center;

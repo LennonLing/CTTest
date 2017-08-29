@@ -309,7 +309,7 @@ static CGFloat CTTagViewXStart = 0;
     // 将能绘制的先绘制出来
     NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
     NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
-    CGRect canDrawRect = CGRectInset(CGRectMake(self.xStart, yStart, self.contextWidth - self.xStart, canDrawAttributedString.height + 2 * config.borderVerticalSpacing), config.borderHorizonSpacing, config.borderVerticalSpacing);
+    CGRect canDrawRect = CGRectMake(self.xStart, yStart, self.contextWidth - self.xStart, canDrawAttributedString.height + 2 * config.borderVerticalSpacing);
     [self addRunRectModelByRect:canDrawRect range:canDrawRange horizonSpacing:config.borderHorizonSpacing verticalSpacing:config.borderVerticalSpacing attributedString:canDrawAttributedString];
     [self.frameMutableArray addObject:config];
     
