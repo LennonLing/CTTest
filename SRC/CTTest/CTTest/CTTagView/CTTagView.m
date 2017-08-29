@@ -31,10 +31,16 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
     [super layoutSubviews];
     // 从这里开始布局 来支持autoLayout
     // load model
-    self.model = [[CTTagViewModel alloc] initWithAttributedString:self.attributedText andBounds:self.bounds];
+    self.model = [[CTTagViewModel alloc] initWithAttributedString:self.attributedText andBounds:CGRectGetWidth(self.bounds)];
     
+    // 这里拿到了model的高度
+    [self invalidateIntrinsicContentSize];
     // 从这里获取当前View的size 组装对应的model
     [self setNeedsDisplay];
+}
+
+- (CGSize)intrinsicContentSize {
+    return CGSizeMake(CGRectGetWidth(self.bounds), ceil(self.model.contextHeight));
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -63,7 +69,7 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
             CGRect pathRect = CGPathGetPathBoundingBox(borderPath);
             
             // 在ios8之后的版本中行高提高了，这里需要增加额外的计算
-            CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height - config.borderHeight), pathRect.size.width, config.borderHeight);
+            CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height - config.borderHeight) + config.borderVerticalSpacing, pathRect.size.width, config.borderHeight);
             UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(tempPathRect, -config.borderHorizonSpacing, -config.borderVerticalSpacing) cornerRadius:config.borderCornerRadius];
             [config.borderColor set];
             bezierPath.lineWidth = config.borderWidth;
@@ -73,11 +79,5 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
         CTFrameDraw(frame, context);
     }
 }
-
-- (CGSize)intrinsicContentSize {
-    return CGSizeMake(100, 100);
-}
-
-
 
 @end

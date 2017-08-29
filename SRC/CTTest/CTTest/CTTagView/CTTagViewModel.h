@@ -23,6 +23,12 @@
 
 
 /**
+ *  绘制当前文本所需要的高度
+ */
+@property (nonatomic, readonly) CGFloat contextHeight;
+
+
+/**
  *  提供需要绘制的文字以及边界
  *
  *  @param attributedString 富文本
@@ -30,6 +36,6 @@
  *
  *  @return model
  */
-- (instancetype)initWithAttributedString:(NSAttributedString *)attributedString andBounds:(CGRect)bounds;
+- (instancetype)initWithAttributedString:(NSAttributedString *)attributedString andBounds:(CGFloat)contextWidth;
 
 @end

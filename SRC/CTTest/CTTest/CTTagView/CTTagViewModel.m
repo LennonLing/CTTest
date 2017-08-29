@@ -68,21 +68,34 @@ typedef NS_ENUM(NSInteger, CTPieceLineCompleted) {
     CTPieceLineCompletedDone
 };
 
-static CGFloat CTTagViewXStart = 1;
-static CGFloat CTTageViewYStart = 3;
+static CGFloat CTTagViewXStart = 0;
+//static CGFloat CTTageViewYStart = 3;
+
+@interface CTRunRectModel : NSObject
+@property (nonatomic)       CGRect rect;
+@property (nonatomic)       CGFloat horizonSpacing;
+@property (nonatomic)       CGFloat verticalSpacing;
+@property (nonatomic)       NSRange range;
+@property (nonatomic, strong) NSAttributedString *attributedString;
+@end
+@implementation CTRunRectModel
+@end
 
 @interface CTTagViewModel ()
-@property (nonatomic) CGRect contextBounds;
+@property (nonatomic) CGFloat contextWidth;
 @property (nonatomic) CGFloat xStart;
 @property (nonatomic) CGFloat yStart;
+@property (nonatomic) NSInteger lineNumber;
 @property (nonatomic) CTFramesetterRef framesetter;
 
 @property (nonatomic, strong) NSAttributedString *attributedString;
 @property (nonatomic, strong, readwrite) NSArray *frameRefArray;
 @property (nonatomic, strong) NSMutableArray *frameRefMutableArray;
 @property (nonatomic, strong, readwrite) NSArray *frameArray;
+@property (nonatomic, assign, readwrite) CGFloat contextHeight;
 @property (nonatomic, strong) NSMutableArray *frameMutableArray;
 @property (nonatomic, strong) NSMutableArray *tempShortFrameMutableArray;
+@property (nonatomic, strong) NSMutableArray *runRectModelArray;
 @end
 
 @implementation CTTagViewModel
@@ -91,18 +104,16 @@ static CGFloat CTTageViewYStart = 3;
     CFRelease(_framesetter);
 }
 
-- (instancetype)initWithAttributedString:(NSAttributedString *)attributedString andBounds:(CGRect)bounds {
+- (instancetype)initWithAttributedString:(NSAttributedString *)attributedString andBounds:(CGFloat)contextWidth {
     self = [super init];
     if (self) {
-        NSAssert(attributedString, @"富文本为空");
-        NSAssert(bounds.size.width > 0 && bounds.size.height > 0, @"文本区域复制存在问题");
-        
-        if (attributedString && bounds.size.width > 0 && bounds.size.height > 0) {
+        if (attributedString && contextWidth > 0) {
             [self setAttributedString:attributedString];
-            [self setContextBounds:bounds];
+            [self setContextWidth:contextWidth];
             [self buildFrameRef];
             [self analyseAttributedStringInfo];
             [self addEndAttributedString];
+            [self getFrameRef];
         }
     }
     return self;
@@ -134,10 +145,11 @@ static CGFloat CTTageViewYStart = 3;
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     
     // 这里添加config高度
-    config.borderHeight = attributedString.lineHeight;
+    config.borderHeight = attributedString.lineHeight + config.borderVerticalSpacing * 2;
     
+    // TODO: 暂时没有做行数的限制，这个可以在后来的现象中增加
     // 计算绘制的高度是否超出给定的高度
-    if ([self greatThanBoundsHeight:attributedString config:config]) {self.yStart = CGFLOAT_MAX; return;}
+//    if ([self greatThanBoundsHeight:attributedString config:config]) {self.yStart = CGFLOAT_MAX; return;}
     
     // 计算当前文字的拼接节点是在行开始还是在行中间
     switch ([self attributedStringJoin]) {
@@ -189,6 +201,21 @@ static CGFloat CTTageViewYStart = 3;
 }
 
 #pragma mark - 辅助函数
+
+- (void)addRunRectModelByRect:(CGRect)rect
+                        range:(NSRange)range
+               horizonSpacing:(CGFloat)horizonSpacing
+              verticalSpacing:(CGFloat)verticalSpacing
+             attributedString:(NSAttributedString *)string {
+    CTRunRectModel *model = [CTRunRectModel new];
+    model.rect = rect;
+    model.horizonSpacing = horizonSpacing;
+    model.verticalSpacing = verticalSpacing;
+    model.attributedString = string;
+    model.range = range;
+    [self.runRectModelArray addObject:model];
+}
+
 - (void)collectFrameAndModelWithAttibutedString:(NSAttributedString *)attributedString rectInset:(CGRect)rectInset range:(NSRange)range {
     CGMutablePathRef path = CGPathCreateMutable();
     CGPathAddRect(path, NULL, rectInset);
@@ -198,12 +225,22 @@ static CGFloat CTTageViewYStart = 3;
     CFRelease(path);
 }
 
+- (void)getFrameRef {
+    // 在这个阶段已经知道了当前的高度是多少了
+    self.contextHeight = self.yStart;
+    // 遍历暂存的rect数组
+    for (CTRunRectModel *rectModel in self.runRectModelArray) {
+        CGRect rectInset = CGRectInset([self convertRect:rectModel.rect], rectModel.horizonSpacing, rectModel.verticalSpacing);
+        [self collectFrameAndModelWithAttibutedString:rectModel.attributedString rectInset:rectInset range:rectModel.range];
+    }
+}
+
 #pragma mark - 整理行环境
 - (void)addCompletedLineRef:(NSRange)range config:(CTFrameParserConfig *)config {
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     
     CGMutablePathRef path = CGPathCreateMutable();
-    CGRect tempRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart, CGRectGetWidth(self.contextBounds), attributedString.height + 2 * config.borderVerticalSpacing)], config.borderHorizonSpacing, config.borderVerticalSpacing);
+    CGRect tempRect = CGRectInset(CGRectMake(self.xStart, self.yStart, self.contextWidth, attributedString.height + 2 * config.borderVerticalSpacing), config.borderHorizonSpacing, config.borderVerticalSpacing);
     CGPathAddRect(path, NULL, tempRect);
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
     
@@ -213,8 +250,7 @@ static CGFloat CTTageViewYStart = 3;
     // 将能绘制的丢到shortFrame中去
     NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
     NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
-    CGRect canDrawRect = CGRectInset([self convertRect:CGRectMake(self.xStart, self.yStart, CGRectGetWidth(self.contextBounds), canDrawAttributedString.height + 2 * config.borderVerticalSpacing)], config.borderHorizonSpacing, config.borderVerticalSpacing);
-    [self collectFrameAndModelWithAttibutedString:canDrawAttributedString rectInset:canDrawRect range:canDrawRange];
+    [self addRunRectModelByRect:CGRectMake(self.xStart, self.yStart, self.contextWidth, canDrawAttributedString.height + 2 * config.borderVerticalSpacing) range:canDrawRange horizonSpacing:config.borderHorizonSpacing verticalSpacing:config.borderVerticalSpacing attributedString:canDrawAttributedString];
     [self.frameMutableArray addObject:config];
     
     // 多余的丢到下一行去绘制
@@ -235,21 +271,18 @@ static CGFloat CTTageViewYStart = 3;
 }
 
 - (void)createShortLineFrameRef {
-    
     // 这里对最大行高做一下处理，从最大行高计算出除去行间距的具体的绘制的高度
     CGFloat drawHeight = [self maxLineHeightWithoutLeadingLanguage];
     
     for (CTShortFrameModel *model in self.tempShortFrameMutableArray) {
-        
         // 将每个CTRun的自己的高度
         CGFloat runHeight = model.attributedString.lineHeight;
         
         // 为了是绘制的中心线对齐，y锚点应该在的高度
         CGFloat yStart = self.yStart + drawHeight - ((drawHeight - runHeight) / 2.0 + runHeight);
-        CGRect rectInset = [self convertRect:CGRectMake(self.xStart, yStart, model.attributedString.width + 2*model.config.borderHorizonSpacing, model.attributedString.height + 2 * model.config.borderVerticalSpacing)];
+        CGRect rectInset = CGRectMake(self.xStart, yStart, model.attributedString.width + 2*model.config.borderHorizonSpacing, model.attributedString.height + 2 * model.config.borderVerticalSpacing);
         
-        CGRect tempRect = CGRectInset(rectInset, model.config.borderHorizonSpacing, model.config.borderVerticalSpacing);
-        [self collectFrameAndModelWithAttibutedString:model.attributedString rectInset:tempRect range:model.range];
+        [self addRunRectModelByRect:rectInset range:model.range horizonSpacing:model.config.borderHorizonSpacing verticalSpacing:model.config.borderVerticalSpacing attributedString:model.attributedString];
         self.xStart += (model.attributedString.width + 2*model.config.borderHorizonSpacing);
     }
 }
@@ -268,7 +301,7 @@ static CGFloat CTTageViewYStart = 3;
     
     
     CGMutablePathRef path = CGPathCreateMutable();
-    CGRect tempRect = CGRectInset([self convertRect:CGRectMake(self.xStart, yStart, CGRectGetWidth(self.contextBounds) - self.xStart, (attributedString.height + 2*config.borderVerticalSpacing))], config.borderHorizonSpacing, config.borderVerticalSpacing);
+    CGRect tempRect = CGRectInset(CGRectMake(self.xStart, yStart, self.contextWidth - self.xStart, (attributedString.height + 2*config.borderVerticalSpacing)), config.borderHorizonSpacing, config.borderVerticalSpacing);
     CGPathAddRect(path, NULL, tempRect);
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
     CFRange frameRange = CTFrameGetVisibleStringRange(frame);
@@ -276,8 +309,8 @@ static CGFloat CTTageViewYStart = 3;
     // 将能绘制的先绘制出来
     NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
     NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
-    CGRect canDrawRect = CGRectInset([self convertRect:CGRectMake(self.xStart, yStart, CGRectGetWidth(self.contextBounds) - self.xStart, canDrawAttributedString.height + 2 * config.borderVerticalSpacing)], config.borderHorizonSpacing, config.borderVerticalSpacing);
-    [self collectFrameAndModelWithAttibutedString:canDrawAttributedString rectInset:canDrawRect range:canDrawRange];
+    CGRect canDrawRect = CGRectInset(CGRectMake(self.xStart, yStart, self.contextWidth - self.xStart, canDrawAttributedString.height + 2 * config.borderVerticalSpacing), config.borderHorizonSpacing, config.borderVerticalSpacing);
+    [self addRunRectModelByRect:canDrawRect range:canDrawRange horizonSpacing:config.borderHorizonSpacing verticalSpacing:config.borderVerticalSpacing attributedString:canDrawAttributedString];
     [self.frameMutableArray addObject:config];
     
     // 多余的丢到下一行去绘制
@@ -317,19 +350,19 @@ static CGFloat CTTageViewYStart = 3;
 }
 
 - (CGRect)convertRect:(CGRect)rect {
-    return CGRectMake(rect.origin.x, CGRectGetHeight(self.contextBounds) - rect.origin.y - rect.size.height, CGRectGetWidth(rect), CGRectGetHeight(rect));
+    return CGRectMake(rect.origin.x, self.contextHeight - rect.origin.y - rect.size.height, CGRectGetWidth(rect), CGRectGetHeight(rect));
 }
 
 #pragma mark - 检测当拼接的状态
 
 - (BOOL)greatThanBoundsHeight:(NSAttributedString *)attributedString config:(CTFrameParserConfig *)config{
-    if ((self.yStart + attributedString.height + 2*config.borderVerticalSpacing) > CGRectGetHeight(self.contextBounds))
+    if ((self.yStart + attributedString.height + 2*config.borderVerticalSpacing) > self.contextHeight)
         return YES;
     return NO;
 }
 
 - (CTAttributedStringLengthType)attributedStringLengthType:(NSAttributedString *)attibutedString config:(CTFrameParserConfig *)config {
-    if ((attibutedString.width + 2*config.borderHorizonSpacing) > CGRectGetWidth(self.contextBounds))
+    if ((attibutedString.width + 2*config.borderHorizonSpacing) > self.contextWidth)
         return CTAttributedStringLengthTypeGreatOrEqualThanLine;
     return CTAttributedStringLengthTypeDefault;
 }
@@ -340,7 +373,7 @@ static CGFloat CTTageViewYStart = 3;
 }
 
 - (CTPieceLineCompleted)pieceLineCompleted:(NSAttributedString *)attributedString config:(CTFrameParserConfig *)config {
-    if ((self.xStart + attributedString.width + 2*config.borderHorizonSpacing) > CGRectGetWidth(self.contextBounds))
+    if ((self.xStart + attributedString.width + 2*config.borderHorizonSpacing) > self.contextWidth)
         return CTPieceLineCompletedDone;
     return CTPieceLineCompletedDefault;
 }
@@ -385,6 +418,13 @@ static CGFloat CTTageViewYStart = 3;
         _tempShortFrameMutableArray = [NSMutableArray new];
     }
     return _tempShortFrameMutableArray;
+}
+
+- (NSMutableArray *)runRectModelArray {
+    if (!_runRectModelArray) {
+        _runRectModelArray = [NSMutableArray new];
+    }
+    return _runRectModelArray;
 }
 
 @end
