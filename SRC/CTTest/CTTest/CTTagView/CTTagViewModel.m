@@ -100,7 +100,8 @@ static CGFloat CTTagViewXStart = 0;
 
 @implementation CTTagViewModel
 
-- (void)dealloc {
+- (void)dealloc
+{
     CFRelease(_framesetter);
 }
 
@@ -120,7 +121,7 @@ static CGFloat CTTagViewXStart = 0;
 }
 
 - (void)buildFrameRef {
-    self.framesetter = CTFramesetterCreateWithAttributedString(
+    _framesetter = CTFramesetterCreateWithAttributedString(
                                                           (CFAttributedStringRef)self.attributedString);
 }
 
