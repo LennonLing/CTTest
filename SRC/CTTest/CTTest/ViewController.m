@@ -29,8 +29,8 @@
     CTFrameParserConfig *config = [CTFrameParserConfig new];
     
     // 这里设置当前文字中最大的宽度和高度的间隔，避免文字压线
-    config.borderHorizonSpacing = 1;
-    config.borderVerticalSpacing = 1;
+    config.borderHorizonSpacing = 2;
+    config.borderVerticalSpacing = 2;
     
 
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:content attributes:[CTFrameParser attributesWithConfig:config]];
@@ -41,8 +41,10 @@
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
                                       NSFontAttributeName:[UIFont systemFontOfSize:10],
-                                      CTAttributedStringNeedBorder:@(YES)
-                                      } range:NSMakeRange(20, 4)];
+                                      CTAttributedStringNeedBorder:@(YES),
+                                      CTAttributedStringBorderHorizonSpacing:@(1),
+                                      CTAttributedStringBorderVerticalSpacing:@(1)
+                                      } range:NSMakeRange(20, 1)];
     
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
@@ -57,8 +59,8 @@
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor greenColor],
                                       CTAttributedStringBorderCornerRadius:@(0),
-                                      CTAttributedStringBorderHorizonSpacing:@(0),
-                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(2),
+                                      CTAttributedStringBorderVerticalSpacing:@(2),
                                       } range:NSMakeRange(70, 4)];
     
     [attributedString addAttributes:@{
@@ -68,8 +70,8 @@
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor greenColor],
                                       CTAttributedStringBorderCornerRadius:@(0),
-                                      CTAttributedStringBorderHorizonSpacing:@(0),
-                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(1),
+                                      CTAttributedStringBorderVerticalSpacing:@(2),
                                       } range:NSMakeRange(75, 2)];
     
     [attributedString addAttributes:@{
@@ -90,8 +92,8 @@
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor yellowColor],
                                       CTAttributedStringBorderCornerRadius:@(0),
-                                      CTAttributedStringBorderHorizonSpacing:@(0),
-                                      CTAttributedStringBorderVerticalSpacing:@(0),
+                                      CTAttributedStringBorderHorizonSpacing:@(2),
+                                      CTAttributedStringBorderVerticalSpacing:@(2),
                                       } range:NSMakeRange(98, 5)];
     
     [attributedString addAttributes:@{
@@ -101,8 +103,8 @@
                                       CTAttributedStringBorderWidth:@(1),
                                       CTAttributedStringBorderColor:[UIColor yellowColor],
                                       CTAttributedStringBorderCornerRadius:@(0),
-                                      CTAttributedStringBorderHorizonSpacing:@(1),
-                                      CTAttributedStringBorderVerticalSpacing:@(1),
+                                      CTAttributedStringBorderHorizonSpacing:@(2),
+                                      CTAttributedStringBorderVerticalSpacing:@(2),
                                       } range:NSMakeRange(104, 3)];
     self.tagView.attributedText = attributedString;
     self.tagView.center = self.view.center;

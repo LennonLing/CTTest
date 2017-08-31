@@ -69,8 +69,9 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
             CGRect pathRect = CGPathGetPathBoundingBox(borderPath);
             
             // 在ios8之后的版本中行高提高了，这里需要增加额外的计算
-            CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height - config.borderHeight) + config.borderVerticalSpacing, pathRect.size.width, config.borderHeight);
-            UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(tempPathRect, -config.borderHorizonSpacing, -config.borderVerticalSpacing) cornerRadius:config.borderCornerRadius];
+            CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height - config.lineHeight), pathRect.size.width, config.lineHeight);
+            CGRect rectInset = CGRectInset(tempPathRect, -config.borderHorizonSpacing, -config.borderVerticalSpacing);
+            UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:rectInset cornerRadius:config.borderCornerRadius];
             [config.borderColor set];
             bezierPath.lineWidth = config.borderWidth;
             [bezierPath stroke];
