@@ -284,14 +284,22 @@ static CGFloat CTTagViewXStart = 0;
     self.xStart = CTTagViewXStart;
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     
-    CGMutablePathRef path = CGPathCreateMutable();
     CGFloat xStart = [self shortLineWidth];
     CGRect tempRect = CGRectMake(xStart + config.borderHorizonSpacing, self.yStart, self.contextWidth - (xStart + 2 * config.borderHorizonSpacing), attributedString.height);
-    CGPathAddRect(path, NULL, tempRect);
-    CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
-    CFRange frameRange = CTFrameGetVisibleStringRange(frame);
-    CFRelease(frame);
-    CFRelease(path);
+    CFRange frameRange = CFRangeMake(0, 0);
+    
+    if (tempRect.size.width < 2) {
+        // 这种情况直接换行
+    }
+    else {
+        // 如果出现了这种情况，计算可视的文案展示
+        CGMutablePathRef path = CGPathCreateMutable();
+        CGPathAddRect(path, NULL, tempRect);
+        CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
+        frameRange = CTFrameGetVisibleStringRange(frame);
+        CFRelease(frame);
+        CFRelease(path);
+    }
 
     // 将能绘制的先绘制出来
     NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);

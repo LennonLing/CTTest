@@ -29,8 +29,8 @@
     CTFrameParserConfig *config = [CTFrameParserConfig new];
     
     // 这里设置当前文字中最大的宽度和高度的间隔，避免文字压线
-    config.borderHorizonSpacing = 2;
-    config.borderVerticalSpacing = 2;
+    config.borderHorizonSpacing = 0;
+    config.borderVerticalSpacing = 0;
     
 
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:content attributes:[CTFrameParser attributesWithConfig:config]];
