@@ -115,7 +115,7 @@ static CGFloat CTTagViewXStart = 0;
 
 - (void)buildFrameRef {
     _framesetter = CTFramesetterCreateWithAttributedString(
-                                                          (CFAttributedStringRef)self.attributedString);
+                                                           (CFAttributedStringRef)self.attributedString);
 }
 
 - (void)analyseAttributedStringInfo {
@@ -143,49 +143,60 @@ static CGFloat CTTagViewXStart = 0;
     
     // TODO: 暂时没有做行数的限制，这个可以在后来的现象中增加
     // 计算绘制的高度是否超出给定的高度
-//    if ([self greatThanBoundsHeight:attributedString config:config]) {self.yStart = CGFLOAT_MAX; return;}
+    //    if ([self greatThanBoundsHeight:attributedString config:config]) {self.yStart = CGFLOAT_MAX; return;}
     
     // 计算当前文字的拼接节点是在行开始还是在行中间
     switch ([self attributedStringJoin]) {
-        // 行开始的处理
+            // 行开始的处理
         case CTAttributedStringJoinDefault:
             // 当前需要绘制的文字的长度类型
             switch ([self attributedStringLengthType:attributedString config:config]) {
-                // 长度小于当前行的情况，将当前信息收集起来，x游标向后移动
+                    // 长度小于当前行的情况，将当前信息收集起来，x游标向后移动
                 case CTAttributedStringLengthTypeDefault:
-                    [self addShortFrameModel:attributedString config:config range:range];
-                    [self.frameMutableArray addObject:config];
-                    [self setXStart:self.xStart + attributedString.width + 2*config.borderHorizonSpacing];
+                    if ([self haveBreakLineSymbol:attributedString]) {
+                        [self addBreakLineRef:range config:config attributedString:attributedString];
+                    }
+                    else {
+                        [self addShortLineRef:range config:config attributedString:attributedString];
+                    }
                     break;
-                // 长度大于当前行的情况，绘制此文字
+                    // 长度大于当前行的情况，绘制此文字
                 case CTAttributedStringLengthTypeGreatOrEqualThanLine:
                     [self addCompletedLineRef:range config:config];
                     break;
             }
             break;
-        // 行中间的处理
+            // 行中间的处理
         case CTAttributedStringJoinMiddle:
             //
             switch ([self pieceLineCompleted:attributedString config:config]) {
-                // 没有被充满,将当前信息收集起来，x游标向后移动
+                    // 没有被充满,将当前信息收集起来，x游标向后移动
                 case CTPieceLineCompletedDefault:
-                    [self addShortFrameModel:attributedString config:config range:range];
-                    [self.frameMutableArray addObject:config];
-                    [self setXStart:self.xStart + attributedString.width + 2*config.borderHorizonSpacing];
+                    if ([self haveBreakLineSymbol:attributedString]) {
+                        [self addBreakLineRef:range config:config attributedString:attributedString];
+                    }
+                    else {
+                        [self addShortLineRef:range config:config attributedString:attributedString];
+                    }
                     break;
-                // 已经被充满
+                    // 已经被充满
                 case CTPieceLineCompletedDone:
                     // 计算当前绘制的文字是否需要加边框
                     switch ([self attributedStringNeedFrame:config]) {
-                        // 不需要加上边框
+                            // 不需要加上边框
                         case CTAttributedStringNeedBorderDefault:
                             [self addBreakAttributesStringWithRange:range config:config];
                             break;
-                        // 需要加边框，将之前行文字数组中的文字绘制，x游标指向0，本次文字做递归处理
+                            // 需要加边框，将之前行文字数组中的文字绘制，x游标指向0，本次文字做递归处理
                         case CTAttributedStringNeedBorderYes:
-                            [self addPieceLineRef];
-                            [self setXStart:CTTagViewXStart];
-                            [self createLineRefWithRange:range config:config];
+                            if ([self haveBreakLineSymbol:attributedString]) {
+                                [self addBreakLineRef:range config:config attributedString:attributedString];
+                            }
+                            else {
+                                [self addPieceLineRef];
+                                [self setXStart:CTTagViewXStart];
+                                [self createLineRefWithRange:range config:config];
+                            }
                             break;
                     }
                     break;
@@ -226,6 +237,35 @@ static CGFloat CTTagViewXStart = 0;
 }
 
 #pragma mark - 整理行环境
+
+- (void)addShortLineRef:(NSRange)range config:(CTFrameParserConfig *)config attributedString:(NSAttributedString *)attributedString {
+    [self addShortFrameModel:attributedString config:config range:range];
+    [self.frameMutableArray addObject:config];
+    [self setXStart:self.xStart + attributedString.width + 2*config.borderHorizonSpacing];
+}
+
+- (void)addBreakLineRef:(NSRange)range config:(CTFrameParserConfig *)config attributedString:(NSAttributedString *)attributedString {
+    if (![self haveBreakLineSymbol:attributedString]) return;
+    NSRange breakSymbolRange = [[attributedString string] rangeOfString:@"\n"];
+    if (breakSymbolRange.length <= 0) return;
+    
+    // 当前行需要绘制的RUN
+    NSRange currentRunRange = NSMakeRange(range.location, breakSymbolRange.location);
+    [self addShortLineRef:currentRunRange config:config attributedString:attributedString];
+    
+    [self createShortLineFrameRef:[self maxLineHeightWithoutLeadingLanguage] maxVerticalHeight:[self maxLineVerticalHeight]];
+    
+    // 多余的丢到下一行去绘制
+    self.xStart = CTTagViewXStart;
+    self.yStart += [self maxLineHeight];
+    
+    [self.tempShortFrameMutableArray removeAllObjects];
+    if (breakSymbolRange.location + breakSymbolRange.length < attributedString.length) {
+        NSRange breakRunRange = NSMakeRange(range.location + breakSymbolRange.location + breakSymbolRange.length, attributedString.length - (breakSymbolRange.location + breakSymbolRange.length));
+        [self createLineRefWithRange:breakRunRange config:config];
+    }
+}
+
 - (void)addCompletedLineRef:(NSRange)range config:(CTFrameParserConfig *)config {
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     
@@ -236,20 +276,25 @@ static CGFloat CTTagViewXStart = 0;
     
     // 从这里开始将之前的文本截断，绘制可以绘制的range
     CFRange frameRange = CTFrameGetVisibleStringRange(frame);
+    CFRelease(frame);
+    CFRelease(path);
     
     // 将能绘制的丢到shortFrame中去
     NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
     NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
-    [self addRunRectModelByRect:CGRectMake(self.xStart + config.borderHorizonSpacing, self.yStart + config.borderVerticalSpacing, self.contextWidth - 2 * config.borderHorizonSpacing, canDrawAttributedString.height) range:canDrawRange attributedString:canDrawAttributedString];
-    [self.frameMutableArray addObject:config];
-    
-    // 多余的丢到下一行去绘制
-    self.xStart = CTTagViewXStart;
-    self.yStart += (canDrawAttributedString.height + 2 * config.borderVerticalSpacing);
-    
-    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
-    CFRelease(frame);
-    CFRelease(path);
+    if ([self haveBreakLineSymbol:canDrawAttributedString]) {
+        [self addBreakLineRef:range config:config attributedString:attributedString];
+    }
+    else {
+        [self addRunRectModelByRect:CGRectMake(self.xStart + config.borderHorizonSpacing, self.yStart + config.borderVerticalSpacing, self.contextWidth - 2 * config.borderHorizonSpacing, canDrawAttributedString.height) range:canDrawRange attributedString:canDrawAttributedString];
+        [self.frameMutableArray addObject:config];
+        
+        // 多余的丢到下一行去绘制
+        self.xStart = CTTagViewXStart;
+        self.yStart += (canDrawAttributedString.height + 2 * config.borderVerticalSpacing);
+        
+        [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
+    }
 }
 
 - (void)addPieceLineRef {
@@ -262,7 +307,7 @@ static CGFloat CTTagViewXStart = 0;
 
 - (void)createShortLineFrameRef:(CGFloat)drawHeight maxVerticalHeight:(CGFloat)maxVerticalHeight {
     // 这里对最大行高做一下处理，从最大行高计算出除去行间距的具体的绘制的高度
-//    CGFloat maxLeadingHeight = [self maxLeadingHeight];
+    self.xStart = CTTagViewXStart;
     for (CTShortFrameModel *model in self.tempShortFrameMutableArray) {
         // 将每个CTRun的自己的高度
         CGFloat runHeight = model.attributedString.lineHeight;
@@ -270,9 +315,7 @@ static CGFloat CTTagViewXStart = 0;
         // 为了是绘制的中心线对齐，y锚点应该在的高度
         
         CGFloat yStart = self.yStart + drawHeight + 2 * maxVerticalHeight - (((drawHeight + 2 * maxVerticalHeight) - (runHeight + 2 * model.config.borderVerticalSpacing)) / 2.0 + (runHeight + model.config.borderVerticalSpacing));
-
         
-//        CGFloat yStart = self.yStart + drawHeight + 2 * maxVerticalHeight - (((drawHeight + 2 * maxVerticalHeight) - (runHeight + 2 * model.config.borderVerticalSpacing)) / 2.0 + (runHeight + model.config.borderVerticalSpacing)) + maxLeadingHeight - (model.attributedString.height - model.attributedString.lineHeight);
         CGRect rectInset = CGRectMake(self.xStart + model.config.borderHorizonSpacing, yStart, model.attributedString.width, model.attributedString.height);
         
         [self addRunRectModelByRect:rectInset range:model.range attributedString:model.attributedString];
@@ -300,21 +343,26 @@ static CGFloat CTTagViewXStart = 0;
         CFRelease(frame);
         CFRelease(path);
     }
-
+    
     // 将能绘制的先绘制出来
     NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
     NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
     
-    [self addShortFrameModel:canDrawAttributedString config:config range:canDrawRange];
-    [self.frameMutableArray addObject:config];
-    [self createShortLineFrameRef:[self maxLineHeightWithoutLeadingLanguage] maxVerticalHeight:[self maxLineVerticalHeight]];
-    
-    // 多余的丢到下一行去绘制
-    self.xStart = CTTagViewXStart;
-    self.yStart += [self maxLineHeight];
-    
-    [self.tempShortFrameMutableArray removeAllObjects];
-    [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
+    if ([self haveBreakLineSymbol:canDrawAttributedString]) {
+        [self addBreakLineRef:range config:config attributedString:attributedString];
+    }
+    else {
+        [self addShortFrameModel:canDrawAttributedString config:config range:canDrawRange];
+        [self.frameMutableArray addObject:config];
+        [self createShortLineFrameRef:[self maxLineHeightWithoutLeadingLanguage] maxVerticalHeight:[self maxLineVerticalHeight]];
+        
+        // 多余的丢到下一行去绘制
+        self.xStart = CTTagViewXStart;
+        self.yStart += [self maxLineHeight];
+        
+        [self.tempShortFrameMutableArray removeAllObjects];
+        [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
+    }
     
 }
 
@@ -324,6 +372,13 @@ static CGFloat CTTagViewXStart = 0;
     model.config = config;
     model.range = range;
     [self.tempShortFrameMutableArray addObject:model];
+}
+
+- (BOOL)haveBreakLineSymbol:(NSAttributedString *)attributedString {
+    if ([[attributedString string] rangeOfString:@"\n"].length > 0) {
+        return YES;
+    }
+    return NO;
 }
 
 - (CGFloat)maxLeadingHeight {
