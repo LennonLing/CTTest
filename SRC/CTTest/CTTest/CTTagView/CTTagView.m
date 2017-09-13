@@ -8,7 +8,6 @@
 
 #import "CTTagView.h"
 #import <CoreText/CoreText.h>
-#import "CTTagViewModel.h"
 #import "CTFrameParserConfig.h"
 
 const NSString * CTAttributedStringNeedBorder = @"CTAttributedStringNeedBorder";
@@ -26,12 +25,23 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
 
 @implementation CTTagView
 
+- (instancetype)initWithModel:(CTTagViewModel *)model {
+    if (self = [super init]) {
+        self.model = model;
+    }
+    return self;
+}
+
 - (void)layoutSubviews {
     
     [super layoutSubviews];
-    // 从这里开始布局 来支持autoLayout
-    // load model
-    self.model = [[CTTagViewModel alloc] initWithAttributedString:self.attributedText andBounds:CGRectGetWidth(self.bounds)];
+    
+    // 如果在布局之前model已经创建完成，用已经创建的model来布局
+    if (!self.model) {
+        // 从这里开始布局 来支持autoLayout
+        // load model
+        self.model = [[CTTagViewModel alloc] initWithAttributedString:self.attributedText andBounds:CGRectGetWidth(self.bounds)];
+    }
     
     // 这里拿到了model的高度
     [self invalidateIntrinsicContentSize];

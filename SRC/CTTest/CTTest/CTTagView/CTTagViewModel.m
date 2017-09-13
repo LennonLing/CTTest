@@ -251,9 +251,11 @@ static CGFloat CTTagViewXStart = 0;
     
     // 当前行需要绘制的RUN
     NSRange currentRunRange = NSMakeRange(range.location, breakSymbolRange.location);
-    [self addShortLineRef:currentRunRange config:config attributedString:attributedString];
-    
-    [self createShortLineFrameRef:[self maxLineHeightWithoutLeadingLanguage] maxVerticalHeight:[self maxLineVerticalHeight]];
+    NSAttributedString *breakString = [self.attributedString attributedSubstringFromRange:currentRunRange];
+    if (currentRunRange.length > 0) {
+        [self addShortLineRef:currentRunRange config:config attributedString:breakString];
+        [self createShortLineFrameRef:[self maxLineHeightWithoutLeadingLanguage] maxVerticalHeight:[self maxLineVerticalHeight]];
+    }
     
     // 多余的丢到下一行去绘制
     self.xStart = CTTagViewXStart;
@@ -331,7 +333,7 @@ static CGFloat CTTagViewXStart = 0;
     CGRect tempRect = CGRectMake(xStart + config.borderHorizonSpacing, self.yStart, self.contextWidth - (xStart + 2 * config.borderHorizonSpacing), attributedString.height);
     CFRange frameRange = CFRangeMake(0, 0);
     
-    if (tempRect.size.width < 2) {
+    if (tempRect.size.width < config.font.pointSize) {
         // 这种情况直接换行
     }
     else {
@@ -352,8 +354,10 @@ static CGFloat CTTagViewXStart = 0;
         [self addBreakLineRef:range config:config attributedString:attributedString];
     }
     else {
-        [self addShortFrameModel:canDrawAttributedString config:config range:canDrawRange];
-        [self.frameMutableArray addObject:config];
+        if (frameRange.length > 0) {
+            [self addShortFrameModel:canDrawAttributedString config:config range:canDrawRange];
+            [self.frameMutableArray addObject:config];
+        }
         [self createShortLineFrameRef:[self maxLineHeightWithoutLeadingLanguage] maxVerticalHeight:[self maxLineVerticalHeight]];
         
         // 多余的丢到下一行去绘制
