@@ -73,20 +73,32 @@ const NSString * CTAttributedStringBorderVerticalSpacing = @"CTAttributedStringB
         CTFrameRef frame = (__bridge CTFrameRef)(self.model.frameRefArray[i]);
         CTFrameParserConfig *config = self.model.frameArray[i];
         
+        CGPathRef borderPath = (CGPathRef)CTFrameGetPath(frame);
+        CGRect pathRect = CGPathGetPathBoundingBox(borderPath);
+        
         // 需要边框的才会绘制边框
         if (config.needBorder) {
-            CGPathRef borderPath = (CGPathRef)CTFrameGetPath(frame);
-            CGRect pathRect = CGPathGetPathBoundingBox(borderPath);
             
             // 在ios8之后的版本中行高提高了，这里需要增加额外的计算
             CGRect tempPathRect = CGRectMake(pathRect.origin.x, pathRect.origin.y + (pathRect.size.height - config.lineHeight), pathRect.size.width, config.lineHeight);
-            CGRect rectInset = CGRectInset(tempPathRect, -config.borderHorizonSpacing, -config.borderVerticalSpacing);
+            CGRect rectInset = CGRectInset(tempPathRect, -(config.borderHorizonSpacing + config.borderWidth), -(config.borderVerticalSpacing + config.borderWidth));
             UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:rectInset cornerRadius:config.borderCornerRadius];
             [config.borderColor set];
             bezierPath.lineWidth = config.borderWidth;
             [bezierPath stroke];
+            
+            
         }
         
+#if DEBUG
+        // 测试使用的填充颜色
+        UIBezierPath *bezierStrokePath = [UIBezierPath bezierPathWithRoundedRect:pathRect cornerRadius:0.0];
+        [[UIColor orangeColor] setFill];
+        [bezierStrokePath fill];
+        
+        CFRange range = CTFrameGetStringRange(frame);
+        NSLog(@"%@",[self.attributedText attributedSubstringFromRange:NSMakeRange(range.location, range.length)]);
+#endif
         CTFrameDraw(frame, context);
     }
 }

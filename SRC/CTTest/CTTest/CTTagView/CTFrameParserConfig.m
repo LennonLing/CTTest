@@ -27,7 +27,7 @@
 }
 
 - (void)setBorderWidth:(CGFloat)borderWidth {
-    NSAssert(borderWidth < 6, @"建议不要将边框的宽度设置的过大！");
+    NSAssert(borderWidth < 3, @"建议不要将边框的宽度设置的过大！");
     _borderWidth = borderWidth;
 }
 

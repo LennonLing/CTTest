@@ -148,7 +148,7 @@
 				TargetAttributes = {
 					29015BE61D4F65160082F21A = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = NUB8RD6CDW;
+						DevelopmentTeam = MN863V35DU;
 					};
 				};
 			};
@@ -308,7 +308,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = NUB8RD6CDW;
+				DEVELOPMENT_TEAM = MN863V35DU;
 				INFOPLIST_FILE = CTTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.myzone.CTTest;
@@ -320,7 +320,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = NUB8RD6CDW;
+				DEVELOPMENT_TEAM = MN863V35DU;
 				INFOPLIST_FILE = CTTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.myzone.CTTest;

@@ -129,7 +129,7 @@ static CGFloat CTTagViewXStart = 0;
 }
 
 - (void)addEndAttributedString{
-    [self addPieceLineRef];
+    [self cleanShorterLineBuffer];
 }
 
 - (void)createLineRefWithRange:(NSRange)range config:(CTFrameParserConfig *)config{
@@ -138,7 +138,7 @@ static CGFloat CTTagViewXStart = 0;
     // 根据range那个attributedString
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     
-    // 这里添加config高度
+    // 这里添加config高度,文本的实际高度
     config.lineHeight = attributedString.lineHeight;
     
     // TODO: 暂时没有做行数的限制，这个可以在后来的现象中增加
@@ -153,9 +153,11 @@ static CGFloat CTTagViewXStart = 0;
             switch ([self attributedStringLengthType:attributedString config:config]) {
                     // 长度小于当前行的情况，将当前信息收集起来，x游标向后移动
                 case CTAttributedStringLengthTypeDefault:
+                    // 当前行中是否包含换行符
                     if ([self haveBreakLineSymbol:attributedString]) {
                         [self addBreakLineRef:range config:config attributedString:attributedString];
                     }
+                    // 不包含就整行绘制
                     else {
                         [self addShortLineRef:range config:config attributedString:attributedString];
                     }
@@ -193,7 +195,7 @@ static CGFloat CTTagViewXStart = 0;
                                 [self addBreakLineRef:range config:config attributedString:attributedString];
                             }
                             else {
-                                [self addPieceLineRef];
+                                [self cleanShorterLineBuffer];
                                 [self setXStart:CTTagViewXStart];
                                 [self createLineRefWithRange:range config:config];
                             }
@@ -237,11 +239,10 @@ static CGFloat CTTagViewXStart = 0;
 }
 
 #pragma mark - 整理行环境
-
 - (void)addShortLineRef:(NSRange)range config:(CTFrameParserConfig *)config attributedString:(NSAttributedString *)attributedString {
     [self addShortFrameModel:attributedString config:config range:range];
     [self.frameMutableArray addObject:config];
-    [self setXStart:self.xStart + attributedString.width + 2*config.borderHorizonSpacing];
+    [self setXStart:self.xStart + attributedString.width + 2 * (config.borderHorizonSpacing + config.borderWidth)];
 }
 
 - (void)addBreakLineRef:(NSRange)range config:(CTFrameParserConfig *)config attributedString:(NSAttributedString *)attributedString {
@@ -255,6 +256,10 @@ static CGFloat CTTagViewXStart = 0;
     if (currentRunRange.length > 0) {
         [self addShortLineRef:currentRunRange config:config attributedString:breakString];
         [self createShortLineFrameRef:[self maxLineHeightWithoutLeadingLanguage] maxVerticalHeight:[self maxLineVerticalHeight]];
+    }
+    else {
+        // 换行符前面的文字为空
+        [self cleanShorterLineBuffer];
     }
     
     // 多余的丢到下一行去绘制
@@ -272,7 +277,7 @@ static CGFloat CTTagViewXStart = 0;
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     
     CGMutablePathRef path = CGPathCreateMutable();
-    CGRect tempRect = CGRectMake(self.xStart + config.borderHorizonSpacing, self.yStart + config.borderVerticalSpacing, self.contextWidth - 2 * config.borderHorizonSpacing, attributedString.height);
+    CGRect tempRect = CGRectMake(self.xStart + config.borderHorizonSpacing + config.borderWidth, self.yStart + config.borderVerticalSpacing + config.borderWidth, self.contextWidth - 2 * (config.borderHorizonSpacing + config.borderWidth), attributedString.height);
     CGPathAddRect(path, NULL, tempRect);
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(range.location, range.length), path, NULL);
     
@@ -284,22 +289,24 @@ static CGFloat CTTagViewXStart = 0;
     // 将能绘制的丢到shortFrame中去
     NSRange canDrawRange = NSMakeRange(range.location, frameRange.length);
     NSAttributedString *canDrawAttributedString = [self.attributedString attributedSubstringFromRange:canDrawRange];
+    
+    
     if ([self haveBreakLineSymbol:canDrawAttributedString]) {
         [self addBreakLineRef:range config:config attributedString:attributedString];
     }
     else {
-        [self addRunRectModelByRect:CGRectMake(self.xStart + config.borderHorizonSpacing, self.yStart + config.borderVerticalSpacing, self.contextWidth - 2 * config.borderHorizonSpacing, canDrawAttributedString.height) range:canDrawRange attributedString:canDrawAttributedString];
+        [self addRunRectModelByRect:CGRectMake(self.xStart + config.borderHorizonSpacing + config.borderWidth, self.yStart + config.borderVerticalSpacing + config.borderWidth, self.contextWidth - 2 * (config.borderHorizonSpacing + config.borderWidth), canDrawAttributedString.height) range:canDrawRange attributedString:canDrawAttributedString];
         [self.frameMutableArray addObject:config];
         
         // 多余的丢到下一行去绘制
         self.xStart = CTTagViewXStart;
-        self.yStart += (canDrawAttributedString.height + 2 * config.borderVerticalSpacing);
+        self.yStart += (canDrawAttributedString.height + 2 * (config.borderVerticalSpacing + config.borderWidth));
         
         [self createLineRefWithRange:NSMakeRange(frameRange.length + range.location, range.length - frameRange.length) config:config];
     }
 }
 
-- (void)addPieceLineRef {
+- (void)cleanShorterLineBuffer {
     if (self.tempShortFrameMutableArray.count == 0) return;
     [self setXStart:CTTagViewXStart];
     [self createShortLineFrameRef:[self maxLineHeightWithoutLeadingLanguage] maxVerticalHeight:[self maxLineVerticalHeight]];
@@ -316,12 +323,12 @@ static CGFloat CTTagViewXStart = 0;
         
         // 为了是绘制的中心线对齐，y锚点应该在的高度
         
-        CGFloat yStart = self.yStart + drawHeight + 2 * maxVerticalHeight - (((drawHeight + 2 * maxVerticalHeight) - (runHeight + 2 * model.config.borderVerticalSpacing)) / 2.0 + (runHeight + model.config.borderVerticalSpacing));
+        CGFloat yStart = self.yStart + drawHeight + 2 * maxVerticalHeight - (((drawHeight + 2 * maxVerticalHeight) - (runHeight + (2 * model.config.borderVerticalSpacing + model.config.borderWidth))) / 2.0 + (runHeight + (model.config.borderVerticalSpacing + model.config.borderWidth)));
         
-        CGRect rectInset = CGRectMake(self.xStart + model.config.borderHorizonSpacing, yStart, model.attributedString.width, model.attributedString.height);
+        CGRect rectInset = CGRectMake(self.xStart + model.config.borderHorizonSpacing + model.config.borderWidth, yStart, model.attributedString.width, model.attributedString.height);
         
         [self addRunRectModelByRect:rectInset range:model.range attributedString:model.attributedString];
-        self.xStart += (model.attributedString.width + 2*model.config.borderHorizonSpacing);
+        self.xStart += (model.attributedString.width + 2 * (model.config.borderHorizonSpacing + model.config.borderWidth));
     }
 }
 
@@ -330,7 +337,7 @@ static CGFloat CTTagViewXStart = 0;
     NSAttributedString *attributedString = [self.attributedString attributedSubstringFromRange:range];
     
     CGFloat xStart = [self shortLineWidth];
-    CGRect tempRect = CGRectMake(xStart + config.borderHorizonSpacing, self.yStart, self.contextWidth - (xStart + 2 * config.borderHorizonSpacing), attributedString.height);
+    CGRect tempRect = CGRectMake(xStart + config.borderHorizonSpacing + config.borderWidth, self.yStart, self.contextWidth - (xStart + 2 * (config.borderHorizonSpacing + config.borderWidth)), attributedString.height);
     CFRange frameRange = CFRangeMake(0, 0);
     
     if (tempRect.size.width < config.font.pointSize) {
@@ -398,7 +405,7 @@ static CGFloat CTTagViewXStart = 0;
 - (CGFloat)shortLineWidth {
     CGFloat width = 0;
     for (CTShortFrameModel *model in self.tempShortFrameMutableArray) {
-        width += (model.attributedString.width + 2*model.config.borderHorizonSpacing);
+        width += (model.attributedString.width + 2* (model.config.borderHorizonSpacing + model.config.borderWidth));
     }
     return width;
 }
@@ -427,7 +434,7 @@ static CGFloat CTTagViewXStart = 0;
 - (CGFloat)maxLineHeight {
     CGFloat maxHeight = 0;
     for (CTShortFrameModel *model in self.tempShortFrameMutableArray) {
-        CGFloat tempHeight = (model.attributedString.height + 2*model.config.borderVerticalSpacing);
+        CGFloat tempHeight = (model.attributedString.height + 2 * (model.config.borderVerticalSpacing + model.config.borderWidth));
         if (tempHeight > maxHeight)
             maxHeight = tempHeight;
     }

@@ -19,22 +19,23 @@
     // get bounds info
     CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
     CFRelease(line);
-    return ascent + descent + leading;
+    return ceilf(ascent + descent + leading);
 }
 
 - (CGFloat)height {
     CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self);
     CGFloat height = CTLineGetBoundsWithOptions(line,kCTLineBoundsIncludeLanguageExtents).size.height;
     CFRelease(line);
-    return height;
+    return ceilf(height);
 }
 
 - (CGFloat)width {
     CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self);
-    CGFloat width = CTLineGetBoundsWithOptions(line,kCTLineBoundsExcludeTypographicLeading).size.width;
+    CGFloat width = CTLineGetBoundsWithOptions(line,kCTLineBoundsIncludeLanguageExtents).size.width;
     CFRelease(line);
-    return width;
+    return ceilf(width);
 }
+
 
 
 @end
