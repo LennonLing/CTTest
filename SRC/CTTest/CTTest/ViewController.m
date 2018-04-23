@@ -43,7 +43,25 @@
                                       NSForegroundColorAttributeName:[UIColor blackColor],
                                       NSFontAttributeName:[UIFont systemFontOfSize:16]
                                       } range:NSMakeRange(0, attributedString.length)];
-
+    
+    
+    /* 这里应该是有bug,给了足够的宽度，最后一个字确实显示不出来，很是不解。 有知道的可以帮忙解答
+    [attributedString addAttributes:@{
+                                      NSForegroundColorAttributeName:[UIColor redColor],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:16],
+                                      CTAttributedStringNeedBorder:@(YES),
+                                      CTAttributedStringBorderHorizonSpacing:@(1),
+                                      CTAttributedStringBorderVerticalSpacing:@(1)
+                                      } range:NSMakeRange(14, 4)];
+   
+    
+    [attributedString addAttributes:@{
+                                      NSForegroundColorAttributeName:[UIColor redColor],
+                                      NSFontAttributeName:[UIFont systemFontOfSize:12],
+                                      CTAttributedStringNeedBorder:@(YES)
+                                      } range:NSMakeRange(50, 6)];
+     */
+    
     [attributedString addAttributes:@{
                                       NSForegroundColorAttributeName:[UIColor redColor],
                                       NSFontAttributeName:[UIFont systemFontOfSize:20],
