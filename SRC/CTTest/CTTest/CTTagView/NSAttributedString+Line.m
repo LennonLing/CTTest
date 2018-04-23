@@ -31,7 +31,7 @@
 
 - (CGFloat)width {
     CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)self);
-    CGFloat width = CTLineGetBoundsWithOptions(line,kCTLineBoundsIncludeLanguageExtents).size.width;
+    CGFloat width = CTLineGetBoundsWithOptions(line,kCTLineBoundsExcludeTypographicLeading).size.width;
     CFRelease(line);
     return ceilf(width);
 }
